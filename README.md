@@ -1,13 +1,13 @@
 Booking Simulator
 
 
-Overview
+✨ Description
 
 This project is a service-oriented .NET console application designed to simulate and automate employee check-in and check-out bookings.
 It integrates with various OBS APIs to synchronize personnel data, work schedules, and booking records.
 
 
-Features
+🔍 Features
 
 🔹 Automated Employee Bookings
 Employees are automatically booked based on their work shifts.
@@ -23,7 +23,7 @@ Settings are stored in a separate appsettings.OBS.Configuration.json file for be
 
 
 
-Architecture
+🏛️ Architecture
 
 The application follows a service-oriented architecture with distinct responsibilities:
 
@@ -32,7 +32,7 @@ ObserverService (formerly Worker) → Monitors and processes scheduled bookings.
 EmployeeDetailsProvider → Fetches and updates relevant employee details.
 
 
-Technologies
+🔧 Technologies
 
  - .NET 5
  - Microsoft Extensions (Logging, Configuration, Dependency Injection)
@@ -40,7 +40,7 @@ Technologies
  - OBS APIs (Personnel, Calendar, Booking)
 
 
-Setup
+▶️ Setup
 
 1️⃣ Configure the Application
 
@@ -55,7 +55,7 @@ Edit appsettings.OBS.Configuration.json with your API URLs and authentication de
  dotnet run
 
 
-License
+⚖ License
 
-This project is licensed under the MIT License. See the LICENSE file for more details.
+This project is licensed under a proprietary license. See the LICENSE file for details.
 
