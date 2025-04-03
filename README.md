@@ -43,12 +43,15 @@ Technologies
 Setup
 
 1️⃣ Configure the Application
+
 Edit appsettings.OBS.Configuration.json with your API URLs and authentication details.
 
 2️⃣ Install Dependencies (if not already installed)
+
  dotnet restore
 
 3️⃣ Run the Application
+
  dotnet run
 
 
