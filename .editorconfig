@@ -1,0 +1,13 @@
+﻿[*.cs]
+
+# CS8073: Das Ergebnis des Ausdrucks lautet immer gleich, da ein Wert dieses Typs niemals 'null' entspricht
+dotnet_diagnostic.CS8073.severity = warning
+
+# CA1305: IFormatProvider angeben
+dotnet_diagnostic.CA1305.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none
+
+# CS4014: Da auf diesen Aufruf nicht gewartet wird, wird die Ausführung der aktuellen Methode vor Abschluss des Aufrufs fortgesetzt.
+dotnet_diagnostic.CS4014.severity = none

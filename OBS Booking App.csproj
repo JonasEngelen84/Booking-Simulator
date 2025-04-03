@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>dotnet-OBS_Booking-F18931F1-C456-4C15-889F-5011179C83CD</UserSecretsId>
+    <RootNamespace>OBS_Booking</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\NewFolder\**" />
+    <Content Remove="Services\NewFolder\**" />
+    <EmbeddedResource Remove="Services\NewFolder\**" />
+    <None Remove="Services\NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IdentityModel" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="OBS.Booking.ApiModel" Version="31.9.0.1" />
+    <PackageReference Include="OBS.Booking.Client" Version="31.9.0.1" />
+    <PackageReference Include="OBS.Calendar.Client" Version="31.9.0.6" />
+    <PackageReference Include="OBS.Calender.ApiModel" Version="28.10.1.768" />
+    <PackageReference Include="OBS.Identity.AccessRights" Version="31.10.0.2" />
+    <PackageReference Include="OBS.Identity.DataAccess" Version="31.6.0.23" />
+    <PackageReference Include="OBS.LIB.Logging" Version="31.5.0.2" />
+    <PackageReference Include="OBS.Stamm.ApiModels" Version="31.9.0.1" />
+    <PackageReference Include="OBS.Stamm.Client" Version="31.9.0.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+</Project>
