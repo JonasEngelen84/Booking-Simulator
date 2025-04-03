@@ -1,4 +1,4 @@
-OBS Booking Console Application
+Booking Simulator
 
 
 Overview
