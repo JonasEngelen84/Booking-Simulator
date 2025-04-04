@@ -5,8 +5,7 @@ namespace OBS_Booking_App.Models
     public class Employee
     {
         public string Id { get; }
-        public string Lastname { get; }
-        public string Forename { get; }
+        public string Name { get; }
         public DateTime? StartContract { get; }
         public DateTime? EndContract { get; }
         public DateTime? StartWork { get; }
@@ -17,8 +16,7 @@ namespace OBS_Booking_App.Models
 
         public Employee(
             string id,
-            string lastname,
-            string forename,
+            string name,
             DateTime? startContract,
             DateTime? endContract,
             DateTime? startWork,
@@ -26,8 +24,7 @@ namespace OBS_Booking_App.Models
             DateTime? dateOfWork)
         {
             Id = id;
-            Lastname = lastname;
-            Forename = forename;
+            Name = name;
             StartContract = startContract;
             EndContract = endContract;
             StartWork = startWork;

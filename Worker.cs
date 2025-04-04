@@ -39,8 +39,8 @@ namespace OBS_Booking_App
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("\nBackgroundservice started at " + DateTime.Now);
-            Console.WriteLine("\nBackgroundservice started at " + DateTime.Now);
+            _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
+            Console.WriteLine("\nBooking Simulator\n\nBackgroundservice started: " + DateTime.Now);
             TimeSpan timeSpan = new TimeSpan(0, 1, 0);
 
             while (!stoppingToken.IsCancellationRequested)
@@ -50,11 +50,11 @@ namespace OBS_Booking_App
                 {
                     employees = new EmployeesConfiguration(_stammApi, _calenderApi, _bookingApi, _logger).Employees;
 
-                    Console.WriteLine($"\nregistered employees: {employees.Count}\n");
+                    Console.WriteLine($"\nRegistered employees: {employees.Count}\n");
 
                     foreach (Employee employee in employees)
                     {
-                        Console.WriteLine($"Id: {employee.Id.PadRight(5, ' ')}Name: {employee.Lastname}, {employee.Forename.PadRight(15, ' ')}" +
+                        Console.WriteLine($"Id: {employee.Id.PadRight(7, ' ')}Name: {employee.Name.PadRight(15, ' ')}" +
                             $"\tStart work: {employee.StartWork}\tEnd work: {employee.EndWork}");
                     }
                 }

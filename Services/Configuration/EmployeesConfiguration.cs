@@ -38,8 +38,7 @@ namespace OBS_Booking_App.Services.Configuration
             get
             {
                 string id = null;
-                string lastname = null;
-                string forename = null;
+                string name = null;
                 DateTime? startContract = null;
                 DateTime? endContract = null;
                 DateTime? startWork = null;
@@ -51,13 +50,12 @@ namespace OBS_Booking_App.Services.Configuration
                     try
                     {
                         id = emp.Id;
-                        lastname = emp.Surname;
-                        forename = emp.Forename;
+                        name = emp.Name;
                         startContract = emp.DateOfEntry;
                         endContract = emp.DateOfLeaving;
 
                         //TODO: CalendarDetailsCunfiguration verbessern
-                        foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.Date.ToUniversalTime()))
+                        foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.AddDays(-15).Date.ToUniversalTime()))
                         { Console.WriteLine(employeeCalendarDetails);
                             dateOfWork = employeeCalendarDetails.Date;
 
@@ -87,8 +85,7 @@ namespace OBS_Booking_App.Services.Configuration
 
                         EmployeesCache.Add(new Employee(
                             id,
-                            lastname,
-                            forename,
+                            name,
                             startContract,
                             endContract,
                             startWork,
@@ -97,8 +94,8 @@ namespace OBS_Booking_App.Services.Configuration
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {id}", ex);
-                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id}" + ex);
+                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}", ex);
+                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}" + ex);
 
                         continue;
                     }
@@ -108,8 +105,7 @@ namespace OBS_Booking_App.Services.Configuration
                     {
                         EmployeesCache.Add(new Employee(
                             id,
-                            lastname,
-                            forename,
+                            name,
                             startContract,
                             endContract,
                             startWork,

@@ -41,8 +41,8 @@ namespace OBS_Booking_App.Services.Configuration
                     _bookingApi.Create(bookingObj);
                     employee.LoggedIn = true;
                     booking = true;
-                    _logger.LogInformation($"\n{employee.Lastname}, {employee.Forename}     \tId: {employee.Id} \tLogged IN at: {DateTime.Now}");
-                    Console.WriteLine($"\n{employee.Lastname}, {employee.Forename}     \tId: {employee.Id} \tLogged IN at: {DateTime.Now}");
+                    _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged IN: {DateTime.Now}");
+                    Console.WriteLine($"\n{employee.Name}     \tId: {employee.Id} \tLogged IN: {DateTime.Now}");
                 }
 
                 // Liegt EndWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
@@ -52,8 +52,8 @@ namespace OBS_Booking_App.Services.Configuration
                     _bookingApi.Create(bookingObj);
                     removeFromEmployeesList.Add(employee);
                     booking = true;
-                    _logger.LogInformation($"\n{employee.Lastname}, {employee.Forename}     \tId: {employee.Id} \tLogged OUT at: {DateTime.Now}");
-                    Console.WriteLine($"\n{employee.Lastname}, {employee.Forename}     \tId: {employee.Id} \tLogged OUT at: {DateTime.Now}");
+                    _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
+                    Console.WriteLine($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
                 }
 
                 Thread.Sleep(3000);
@@ -79,8 +79,8 @@ namespace OBS_Booking_App.Services.Configuration
                 // Wenn LoggedIn Eigenschaft des Mitarbeiters = true    =>  Mitarbeiter-Daten auf Konsole ausgeben.
                 if (employee.LoggedIn == true)
                 {
-                    _logger.LogInformation($"{employee.Lastname}, {employee.Forename.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
-                    Console.WriteLine($"{employee.Lastname}, {employee.Forename.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
+                    _logger.LogInformation($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
+                    Console.WriteLine($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
 
                     loggedIn++;
                 }
