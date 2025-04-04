@@ -27,8 +27,8 @@ namespace OBS_Booking_App.Services.Configuration
 
         public async Task ExecuteAsync(List<Employee> employees)
         {
-            _logger.LogInformation($"\nBooking process started at: {DateTime.Now}");
-            Console.WriteLine($"\nBooking process started at: {DateTime.Now}");
+            _logger.LogInformation($"\nBooking process started: {DateTime.Now}");
+            Console.WriteLine($"\nBooking process started: {DateTime.Now}");
 
             TimeSpan TimeSpan = new TimeSpan(0, 1, 0);
 
@@ -76,8 +76,7 @@ namespace OBS_Booking_App.Services.Configuration
 
             foreach (Employee employee in employees)
             {
-                // Wenn LoggedIn Eigenschaft des Mitarbeiters = true    =>  Mitarbeiter-Daten auf Konsole ausgeben.
-                if (employee.LoggedIn == true)
+                if (employee.LoggedIn)
                 {
                     _logger.LogInformation($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
                     Console.WriteLine($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
@@ -85,8 +84,8 @@ namespace OBS_Booking_App.Services.Configuration
                     loggedIn++;
                 }
             }
-            _logger.LogInformation($"{loggedIn} Employees are Logged at: {DateTime.Now}\n\nBooking done\n");
-            Console.WriteLine($"{loggedIn} Employees are Logged at: {DateTime.Now}\n\nBooking done\n");
+            _logger.LogInformation($"{loggedIn} Employees are Logged: {DateTime.Now}\n\nBooking done\n");
+            Console.WriteLine($"{loggedIn} Employees are Logged: {DateTime.Now}\n\nBooking done\n");
         }
     }
 }

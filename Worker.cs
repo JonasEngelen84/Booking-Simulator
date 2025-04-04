@@ -41,6 +41,7 @@ namespace OBS_Booking_App
         {
             _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
             Console.WriteLine("\nBooking Simulator\n\nBackgroundservice started: " + DateTime.Now);
+
             TimeSpan timeSpan = new TimeSpan(0, 1, 0);
 
             while (!stoppingToken.IsCancellationRequested)
@@ -48,18 +49,24 @@ namespace OBS_Booking_App
                 // Um Mitternacht oder wenn die Mitarbeiter-Liste leer ist => Mitarbeiter-Liste updaten.
                 if (employees.Count == 0 || DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00"))
                 {
+                    Console.WriteLine($"Check employees: {DateTime.Now}");
+
                     employees = new EmployeesConfiguration(_stammApi, _calenderApi, _bookingApi, _logger).Employees;
 
-                    Console.WriteLine($"\nRegistered employees: {employees.Count}\n");
+                    Console.WriteLine($"Registered employees: {employees.Count}\n");
 
                     foreach (Employee employee in employees)
                     {
-                        Console.WriteLine($"Id: {employee.Id.PadRight(7, ' ')}Name: {employee.Name.PadRight(15, ' ')}" +
+                        Console.WriteLine($"Id: {employee.Id.PadRight(10, ' ')}Name: {employee.Name.PadRight(20, ' ')}" +
                             $"\tStart work: {employee.StartWork}\tEnd work: {employee.EndWork}");
                     }
                 }
 
-                bookingService.ExecuteAsync(employees);
+                if (employees.Count > 0)
+                {
+                    bookingService.ExecuteAsync(employees);
+                }
+
                 await Task.Delay(60000, stoppingToken);
             }
         }

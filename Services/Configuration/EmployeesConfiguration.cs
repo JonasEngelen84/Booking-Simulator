@@ -46,7 +46,7 @@ namespace OBS_Booking_App.Services.Configuration
                 DateTime? dateOfWork = null;
 
                 foreach (var emp in _stammApi.All())
-                {Console.WriteLine(emp);
+                {
                     try
                     {
                         id = emp.Id;
@@ -55,7 +55,7 @@ namespace OBS_Booking_App.Services.Configuration
                         endContract = emp.DateOfLeaving;
 
                         //TODO: CalendarDetailsCunfiguration verbessern
-                        foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.AddDays(-15).Date.ToUniversalTime()))
+                        foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.Date.ToUniversalTime()))
                         { Console.WriteLine(employeeCalendarDetails);
                             dateOfWork = employeeCalendarDetails.Date;
 
@@ -83,14 +83,18 @@ namespace OBS_Booking_App.Services.Configuration
                             endWork = parseTime.Add(TimeSpanEndWork);
                         }
 
-                        EmployeesCache.Add(new Employee(
-                            id,
-                            name,
-                            startContract,
-                            endContract,
-                            startWork,
-                            endWork,
-                            dateOfWork));
+                        // Wenn Mitarbeiter heute berechtigt vertraglich zu arbeiten & schichtende noch nicht verstrichen ist
+                        if (dateOfWork == DateTime.Now.Date && endWork > DateTime.Now && startContract <= DateTime.Now.Date && endContract > DateTime.Now.Date)
+                        {
+                            EmployeesCache.Add(new Employee(
+                                id,
+                                name,
+                                startContract,
+                                endContract,
+                                startWork,
+                                endWork,
+                                dateOfWork));
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -98,19 +102,6 @@ namespace OBS_Booking_App.Services.Configuration
                         Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}" + ex);
 
                         continue;
-                    }
-
-                    // Wenn Mitarbeiter heute berechtigt vertraglich zu arbeiten & schichtende noch nicht verstrichen ist
-                    if (dateOfWork == DateTime.Now.Date && endWork > DateTime.Now && startContract <= DateTime.Now.Date  && endContract > DateTime.Now.Date)
-                    {
-                        EmployeesCache.Add(new Employee(
-                            id,
-                            name,
-                            startContract,
-                            endContract,
-                            startWork,
-                            endWork,
-                            dateOfWork));
                     }
                 }
                 return EmployeesCache;
