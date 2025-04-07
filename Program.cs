@@ -10,6 +10,7 @@ using System;
 using OBS.LIB.Logging.Extensions;
 using OBS.Calendar.Client.Api;
 using OBS.Booking.Client.Api;
+using System.IO;
 
 namespace OBS_Booking_App
 {
@@ -37,11 +38,28 @@ namespace OBS_Booking_App
                 .AddObsLogging()
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var configuration = new ConfigurationBuilder()
-                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                        .AddJsonFile("appsettings.OBS.Configuration.json", optional: true, reloadOnChange: true)
-                        .AddEnvironmentVariables()
-                        .Build();
+                    var configBuilder = new ConfigurationBuilder()
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                    if (File.Exists("appsettings.OBS.Configuration.json"))
+                    {
+                        configBuilder.AddJsonFile("appsettings.OBS.Configuration.json", optional: false, reloadOnChange: true);
+                        Console.WriteLine("Booking Simulator started\n\nLoaded: appsettings.OBS.Configuration.json");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Booking Simulator started\n\nNo appsettings.OBS.Configuration.json found!\nFallback: using appsettings.json");
+                    }
+
+                    if (!File.Exists("NuGet.Config"))
+                    {
+                        Console.WriteLine("WARNING: NuGet.Config not found. Private feeds may not work.");
+                    }
+
+                    configBuilder.AddEnvironmentVariables();
+
+                    var configuration = configBuilder.Build();
 
                     services.AddOptions();
                     services.AddTransient<AuthenticationService>();
@@ -55,6 +73,7 @@ namespace OBS_Booking_App
                         var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
                         var obsStammUrl = servicesConfig.Value.StammServiceUrl;
                         var personsApi = new PersonsApi($"{obsStammUrl}");
+
                         var authenticationService = provider.GetRequiredService<AuthenticationService>();
                         var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
                         personsApi.Configuration = OBS.Stamm.Client.Client.Configuration.MergeConfigurations(

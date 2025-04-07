@@ -32,6 +32,11 @@ namespace OBS_Booking_App.Services.Configuration
             _bookingApi = bookingApi;
             _logger = logger;
         }
+        
+        public EmployeesConfiguration(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         public List<Employee> Employees
         {

@@ -36,11 +36,17 @@ namespace OBS_Booking_App
             _logger = logger;
             bookingService = new BookingService(bookingApi, _logger, this);
         }
+        
+        public Worker(ILogger<Worker> logger)
+        {
+            _logger = logger;
+            bookingService = new BookingService(_logger, this);
+        }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
-            Console.WriteLine("\nBooking Simulator\n\nBackgroundservice started: " + DateTime.Now);
+            Console.WriteLine("\nBackgroundservice started: " + DateTime.Now);
 
             TimeSpan timeSpan = new TimeSpan(0, 1, 0);
 
@@ -51,7 +57,12 @@ namespace OBS_Booking_App
                 {
                     Console.WriteLine($"Check employees: {DateTime.Now}");
 
-                    employees = new EmployeesConfiguration(_stammApi, _calenderApi, _bookingApi, _logger).Employees;
+                    if (_stammApi != null && _calenderApi != null && _bookingApi != null)
+                        employees = new EmployeesConfiguration(_stammApi, _calenderApi, _bookingApi, _logger).Employees;
+                    else
+                    {
+
+                    }
 
                     Console.WriteLine($"Registered employees: {employees.Count}\n");
 

@@ -24,6 +24,12 @@ namespace OBS_Booking_App.Services.Configuration
             _logger = logger;
             _worker = worker;
         }
+        
+        public BookingService(ILogger logger, Worker worker)
+        {
+            _logger = logger;
+            _worker = worker;
+        }
 
         public async Task ExecuteAsync(List<Employee> employees)
         {
@@ -38,7 +44,10 @@ namespace OBS_Booking_App.Services.Configuration
                 if (employee.StartWork <= DateTime.Now && employee.StartWork >= DateTime.Now.Add(TimeSpan))
                 {
                     CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
-                    _bookingApi.Create(bookingObj);
+                    
+                    if (_bookingApi != null)
+                        _bookingApi.Create(bookingObj);
+
                     employee.LoggedIn = true;
                     booking = true;
                     _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged IN: {DateTime.Now}");
@@ -49,7 +58,10 @@ namespace OBS_Booking_App.Services.Configuration
                 if (employee.EndWork <= DateTime.Now && employee.EndWork >= DateTime.Now.Add(TimeSpan))
                 {
                     CreateBookingModel bookingObj = new(0, BookingType.LEAVE, DateTime.Now, default, employee.Id, null);
-                    _bookingApi.Create(bookingObj);
+
+                    if (_bookingApi != null)
+                        _bookingApi.Create(bookingObj);
+
                     removeFromEmployeesList.Add(employee);
                     booking = true;
                     _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
@@ -84,8 +96,8 @@ namespace OBS_Booking_App.Services.Configuration
                     loggedIn++;
                 }
             }
-            _logger.LogInformation($"{loggedIn} Employees are Logged: {DateTime.Now}\n\nBooking done\n");
-            Console.WriteLine($"{loggedIn} Employees are Logged: {DateTime.Now}\n\nBooking done\n");
+            _logger.LogInformation($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
+            Console.WriteLine($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
         }
     }
 }
