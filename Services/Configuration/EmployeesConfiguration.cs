@@ -21,20 +21,10 @@ namespace OBS_Booking_App.Services.Configuration
         Random rndObj = new();
         private List<Employee> EmployeesCache = new();
 
-        public EmployeesConfiguration(
-            IPersonsApi stammApi,
-            IPersonCalendarApi calenderApi,
-            IBookingApi bookingApi,
-            ILogger logger)
+        public EmployeesConfiguration(IPersonsApi stammApi, IPersonCalendarApi calenderApi, ILogger logger)
         {
             _stammApi = stammApi;
             _calenderApi = calenderApi;
-            _bookingApi = bookingApi;
-            _logger = logger;
-        }
-        
-        public EmployeesConfiguration(ILogger logger)
-        {
             _logger = logger;
         }
 
@@ -52,61 +42,67 @@ namespace OBS_Booking_App.Services.Configuration
 
                 foreach (var emp in _stammApi.All())
                 {
-                    try
+                    if (string.IsNullOrWhiteSpace(id) ||
+                        string.IsNullOrWhiteSpace(name) ||
+                        startContract == null ||
+                        endContract == null)
                     {
-                        id = emp.Id;
-                        name = emp.Name;
-                        startContract = emp.DateOfEntry;
-                        endContract = emp.DateOfLeaving;
-
-                        //TODO: CalendarDetailsCunfiguration verbessern
-                        foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.Date.ToUniversalTime()))
-                        { Console.WriteLine(employeeCalendarDetails);
-                            dateOfWork = employeeCalendarDetails.Date;
-
-                            // Bestimmen der Buchung bei Schichtbeginn.
-                            // Bei einem random Ergebnis von 1, oder 2 (Spanne von 1 - 10).
-                            int rnd = rndObj.Next(1, 10);
-                            if (rnd <= 2)
-                            {
-                                // bis zu 10 Minuten NACH offiziellem Schichtbeginn buchen.
-                                rnd = rndObj.Next(0, 10);
-                            }
-                            else
-                            {
-                                // sonst bis zu 10 Minuten VOR offiziellem Schichtbeginn buchen.
-                                rnd = rndObj.Next(-10, 0);
-                            }
-                            TimeSpan TimeSpanStartWork = new TimeSpan(0, rnd, 0);
-                            DateTime parseTime = (DateTime)startWork;
-                            startWork = parseTime.Add(TimeSpanStartWork);
-
-                            // Schichtende bis zu 10 Minuten nach offiziellem Schichtende buchen.
-                            rnd = rndObj.Next(0, 10);
-                            TimeSpan TimeSpanEndWork = new TimeSpan(0, rnd, 0);
-                            parseTime = (DateTime)endWork;
-                            endWork = parseTime.Add(TimeSpanEndWork);
-                        }
-
-                        // Wenn Mitarbeiter heute berechtigt vertraglich zu arbeiten & schichtende noch nicht verstrichen ist
-                        if (dateOfWork == DateTime.Now.Date && endWork > DateTime.Now && startContract <= DateTime.Now.Date && endContract > DateTime.Now.Date)
-                        {
-                            EmployeesCache.Add(new Employee(
-                                id,
-                                name,
-                                startContract,
-                                endContract,
-                                startWork,
-                                endWork,
-                                dateOfWork));
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}", ex);
-                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}" + ex);
-
+                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}");
+                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}");
                         continue;
+                    }
+
+                    id = emp.Id;
+                    name = emp.Name;
+                    startContract = emp.DateOfEntry;
+                    endContract = emp.DateOfLeaving;
+
+                    //TODO: CalendarDetailsCunfiguration verbessern
+                    foreach (var employeeCalendarDetails in _calenderApi.GetSimpleFromNumberAndDateAsync(id, DateTime.Now.Date.ToUniversalTime()))
+                    {
+                        if (startWork == null || endWork == null || dateOfWork == null)
+                        {
+                            _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}");
+                            Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {id} - Name: {name}");
+                            continue;
+                        }
+
+                        dateOfWork = employeeCalendarDetails.Date;
+
+                        // Bestimmen der Buchung bei Schichtbeginn.
+                        // Bei einem random Ergebnis von 1, oder 2 (Spanne von 1 - 10).
+                        int rnd = rndObj.Next(1, 10);
+                        if (rnd <= 2)
+                        {
+                            // bis zu 10 Minuten NACH offiziellem Schichtbeginn buchen.
+                            rnd = rndObj.Next(0, 10);
+                        }
+                        else
+                        {
+                            // sonst bis zu 10 Minuten VOR offiziellem Schichtbeginn buchen.
+                            rnd = rndObj.Next(-10, 0);
+                        }
+                        TimeSpan TimeSpanStartWork = new TimeSpan(0, rnd, 0);
+                        DateTime parseTime = (DateTime)startWork;
+                        startWork = parseTime.Add(TimeSpanStartWork);
+
+                        // Schichtende bis zu 10 Minuten nach offiziellem Schichtende buchen.
+                        rnd = rndObj.Next(0, 10);
+                        TimeSpan TimeSpanEndWork = new TimeSpan(0, rnd, 0);
+                        parseTime = (DateTime)endWork;
+                        endWork = parseTime.Add(TimeSpanEndWork);
+                    }
+
+                    // Wenn Mitarbeiter heute berechtigt vertraglich zu arbeiten & schichtende noch nicht verstrichen ist
+                    if (dateOfWork == DateTime.Now.Date && endWork > DateTime.Now && startContract <= DateTime.Now.Date && endContract > DateTime.Now.Date)
+                    {
+                        EmployeesCache.Add(new Employee(
+                            id,
+                            name,
+                            startContract,
+                            endContract,
+                            startWork,
+                            endWork));
                     }
                 }
                 return EmployeesCache;

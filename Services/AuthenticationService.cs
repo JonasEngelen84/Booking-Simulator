@@ -26,23 +26,19 @@ namespace OBS_Booking_App.Services
 
         public async Task<string> GetAccessTokenAsync(CancellationToken token)
         {   _logger.LogInformation("Starting request for authentication token from STS.");
-            //Console.WriteLine("Starting request for authentication token from STS.");
             var obsIdentityUrl = _servicesConfig.Value.STSServiceUrl;
 
             _logger.LogInformation($"Contacting STS Server at: '{obsIdentityUrl}' for OpenID Configuration.");
-            //Console.WriteLine($"Contacting STS Server at: '{obsIdentityUrl}' for OpenID Configuration.");
             var client = new HttpClient();
             var disco = await client.GetDiscoveryDocumentAsync($"{obsIdentityUrl}", cancellationToken: token);
 
             if (disco.IsError)
             {
                 _logger.LogInformation("Failed to retrieve the discovery document. Throwing failure back to caller.");
-                Console.WriteLine("Failed to retrieve the discovery document. Throwing failure back to caller.");
                 throw new AuthenticationException(disco.Error);
             }
 
             _logger.LogInformation($"Discovery document found. Requesting credentials for Client: '{_authConfig.Value.ClientId}' with scopes: '{_authConfig.Value.Scopes.Aggregate((l, r) => $"{l}, {r}")}'");
-            //Console.WriteLine($"Discovery document found. Requesting credentials for Client: '{_authConfig.Value.ClientId}' with scopes: '{_authConfig.Value.Scopes.Aggregate((l, r) => $"{l}, {r}")}'");
 
             var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
@@ -57,12 +53,11 @@ namespace OBS_Booking_App.Services
             if (tokenResponse.IsError)
             {
                 _logger.LogInformation("Failed to request credentials. An authentication error has occured. Throwing failure back to caller.");
-                Console.WriteLine("Failed to request credentials. An authentication error has occured. Throwing failure back to caller.");
                 throw new InvalidCredentialException(tokenResponse.Error);
             }
 
             _logger.LogInformation($"Authentication token received. It expires in: {tokenResponse.ExpiresIn} seconds.");
-            //Console.WriteLine($"Authentication token received. It expires in: {tokenResponse.ExpiresIn} seconds.");
+
             return tokenResponse.AccessToken;
         }
     }

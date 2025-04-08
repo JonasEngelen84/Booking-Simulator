@@ -25,9 +25,9 @@ namespace OBS_Booking_App
         private List<Employee> employees = new();
 
         public Worker(
-            IPersonsApi stammApi,
-            IBookingApi bookingApi,
-            IPersonCalendarApi calenderApi,
+            IPersonsApi? stammApi,
+            IBookingApi? bookingApi,
+            IPersonCalendarApi? calenderApi,
             ILogger<Worker> logger)
         {
             _stammApi = stammApi;
@@ -35,12 +35,6 @@ namespace OBS_Booking_App
             _bookingApi = bookingApi;
             _logger = logger;
             bookingService = new BookingService(bookingApi, _logger, this);
-        }
-        
-        public Worker(ILogger<Worker> logger)
-        {
-            _logger = logger;
-            bookingService = new BookingService(_logger, this);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -52,14 +46,14 @@ namespace OBS_Booking_App
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                // Um Mitternacht oder wenn die Mitarbeiter-Liste leer ist => Mitarbeiter-Liste updaten.
                 if (employees.Count == 0 || DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00"))
                 {
                     Console.WriteLine($"Check employees: {DateTime.Now}");
 
-                    if (_stammApi != null && _calenderApi != null && _bookingApi != null)
-                        employees = new EmployeesConfiguration(_stammApi, _calenderApi, _bookingApi, _logger).Employees;
-                    else
+                    if (_stammApi != null && _calenderApi != null)
+                        employees = new EmployeesConfiguration(_stammApi, _calenderApi, _logger).Employees;
+
+                    if (employees.Count < 8)
                     {
 
                     }
@@ -76,7 +70,7 @@ namespace OBS_Booking_App
                 if (employees.Count > 0)
                 {
                     bookingService.ExecuteAsync(employees);
-                }
+                }                
 
                 await Task.Delay(60000, stoppingToken);
             }

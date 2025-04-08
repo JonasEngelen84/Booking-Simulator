@@ -12,23 +12,14 @@ namespace OBS_Booking_App.Services.Configuration
 {
     public class BookingService
     {
-        private readonly IBookingApi _bookingApi;
+        private readonly IBookingApi? _bookingApi;
         private readonly ILogger _logger;
-        private readonly Worker _worker;
-        List<Employee> removeFromEmployeesList = new();
         bool booking;
 
-        public BookingService(IBookingApi bookingApi, ILogger logger, Worker worker)
+        public BookingService(IBookingApi? bookingApi, ILogger logger, Worker worker)
         {
             _bookingApi = bookingApi;
             _logger = logger;
-            _worker = worker;
-        }
-        
-        public BookingService(ILogger logger, Worker worker)
-        {
-            _logger = logger;
-            _worker = worker;
         }
 
         public async Task ExecuteAsync(List<Employee> employees)
@@ -43,10 +34,11 @@ namespace OBS_Booking_App.Services.Configuration
                 // Liegt StartWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
                 if (employee.StartWork <= DateTime.Now && employee.StartWork >= DateTime.Now.Add(TimeSpan))
                 {
-                    CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
-                    
                     if (_bookingApi != null)
+                    {
+                        CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
                         _bookingApi.Create(bookingObj);
+                    }
 
                     employee.LoggedIn = true;
                     booking = true;
@@ -57,12 +49,12 @@ namespace OBS_Booking_App.Services.Configuration
                 // Liegt EndWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
                 if (employee.EndWork <= DateTime.Now && employee.EndWork >= DateTime.Now.Add(TimeSpan))
                 {
-                    CreateBookingModel bookingObj = new(0, BookingType.LEAVE, DateTime.Now, default, employee.Id, null);
-
                     if (_bookingApi != null)
+                    {
+                        CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
                         _bookingApi.Create(bookingObj);
+                    }
 
-                    removeFromEmployeesList.Add(employee);
                     booking = true;
                     _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
                     Console.WriteLine($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
@@ -71,33 +63,26 @@ namespace OBS_Booking_App.Services.Configuration
                 Thread.Sleep(3000);
             }
 
-            // Wenn gebucht wurde => zeige Anwesenheitsliste.
             if (booking == true)
             {
-                outputEmployeesList(employees);
-            }
-        }
+                int loggedIn = 0;
 
-        // Mitarbeiter-Liste ausgeben.
-        public void outputEmployeesList(List<Employee> employees)
-        {
-            int loggedIn = 0;
+                _logger.LogInformation("\n\nActually logged in:");
+                Console.WriteLine("\n\nActually logged in:");
 
-            _logger.LogInformation("\n\nActually logged in:");
-            Console.WriteLine("\n\nActually logged in:");
-
-            foreach (Employee employee in employees)
-            {
-                if (employee.LoggedIn)
+                foreach (Employee employee in employees)
                 {
-                    _logger.LogInformation($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
-                    Console.WriteLine($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
+                    if (employee.LoggedIn)
+                    {
+                        _logger.LogInformation($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
+                        Console.WriteLine($"{employee.Name.PadLeft(16, ' ')}\tId: {employee.Id.PadLeft(6, ' ')}\tStatus: Logged IN");
 
-                    loggedIn++;
+                        loggedIn++;
+                    }
                 }
+                _logger.LogInformation($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
+                Console.WriteLine($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
             }
-            _logger.LogInformation($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
-            Console.WriteLine($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
         }
     }
 }
