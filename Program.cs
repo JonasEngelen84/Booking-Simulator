@@ -57,16 +57,16 @@ namespace OBS_Booking_App
                         .Build();
 
                     services.AddOptions();
-                    services.AddTransient<EmployeesApiConfiguration>();
-                    services.AddTransient<EmployeesAppsettingsConfiguration>();
-                    services.AddTransient<AuthenticationService>();
-                    services.AddTransient<BookingService>();
+                    services.AddSingleton<EmployeesApiConfiguration>();
+                    services.AddSingleton<EmployeesAppsettingsConfiguration>();
+                    services.AddSingleton<AuthenticationService>();
+                    services.AddSingleton<BookingService>();
                     services.AddHostedService<Worker>();
 
                     services.Configure<ServicesConfiguration>(configuration.GetSection("Services"));
                     services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
 
-                    services.AddTransient<IPersonsApi>(provider =>
+                    services.AddSingleton<IPersonsApi>(provider =>
                     {
                         try
                         {
@@ -92,7 +92,7 @@ namespace OBS_Booking_App
                         }
                     });
 
-                    services.AddTransient<IPersonCalendarApi>(provider =>
+                    services.AddSingleton<IPersonCalendarApi>(provider =>
                     {
                         try
                         {
@@ -117,7 +117,7 @@ namespace OBS_Booking_App
                         }
                     });
 
-                    services.AddTransient<IBookingApi>(provider =>
+                    services.AddSingleton<IBookingApi>(provider =>
                     {
                         try
                         {
@@ -145,7 +145,7 @@ namespace OBS_Booking_App
 
                     if (!File.Exists("NuGet.Config"))
                     {
-                        Console.WriteLine("WARNING: NuGet.Config not found. Private feeds may not work.");
+                        Console.WriteLine("WARNING: NuGet.Config not found. Private feeds may not work for cloned projects.");
                     }                    
                 });
     }
