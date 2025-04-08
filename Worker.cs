@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using OBS.Booking.Client.Api;
 using OBS.Calendar.Client.Api;
 using OBS.Stamm.Client.Api;
+using OBS_Booking.Services.Configuration;
 using OBS_Booking_App.Models;
 using OBS_Booking_App.Services;
 using OBS_Booking_App.Services.Configuration;
@@ -16,25 +17,27 @@ namespace OBS_Booking_App
 {
     public class Worker : BackgroundService
     {
-        private readonly IPersonsApi _stammApi;
-        private readonly IPersonCalendarApi _calenderApi;
-        private readonly IBookingApi _bookingApi;
+        private readonly EmployeesApiConfiguration _apiConfig;
+        private readonly EmployeesAppsettingsConfiguration _appsettingsConfig;
+        private readonly BookingService _bookingService;
+        private readonly IPersonsApi? _stammApi;
+        private readonly IPersonCalendarApi? _calenderApi;
         private readonly ILogger _logger;
-        private readonly BookingService bookingService;
-
-        private List<Employee> employees = new();
 
         public Worker(
-            IPersonsApi? stammApi,
-            IBookingApi? bookingApi,
-            IPersonCalendarApi? calenderApi,
+            EmployeesApiConfiguration apiConfig,
+            EmployeesAppsettingsConfiguration appsettingsConfig,
+            BookingService bookingService,
+            IPersonsApi stammApi,
+            IPersonCalendarApi calenderApi,
             ILogger<Worker> logger)
         {
+            _apiConfig = apiConfig;
+            _appsettingsConfig = appsettingsConfig;
+            _bookingService = bookingService;
             _stammApi = stammApi;
             _calenderApi = calenderApi;
-            _bookingApi = bookingApi;
             _logger = logger;
-            bookingService = new BookingService(bookingApi, _logger, this);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -42,6 +45,7 @@ namespace OBS_Booking_App
             _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
             Console.WriteLine("\nBackgroundservice started: " + DateTime.Now);
 
+            List<Employee> employees = new();
             TimeSpan timeSpan = new TimeSpan(0, 1, 0);
 
             while (!stoppingToken.IsCancellationRequested)
@@ -51,11 +55,16 @@ namespace OBS_Booking_App
                     Console.WriteLine($"Check employees: {DateTime.Now}");
 
                     if (_stammApi != null && _calenderApi != null)
-                        employees = new EmployeesConfiguration(_stammApi, _calenderApi, _logger).Employees;
+                        employees = _apiConfig.Employees;
 
-                    if (employees.Count < 8)
+                    if (employees.Count < 6)
                     {
+                        var fallbackEmployees = _appsettingsConfig.Employees;
 
+                        foreach (var emp in fallbackEmployees)
+                        {
+                            employees.Add(emp);
+                        }
                     }
 
                     Console.WriteLine($"Registered employees: {employees.Count}\n");
@@ -69,7 +78,7 @@ namespace OBS_Booking_App
 
                 if (employees.Count > 0)
                 {
-                    bookingService.ExecuteAsync(employees);
+                    _bookingService.ExecuteAsync(employees);
                 }                
 
                 await Task.Delay(60000, stoppingToken);

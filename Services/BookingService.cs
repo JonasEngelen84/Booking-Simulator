@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OBS.Booking.Client.Api;
 using OBS.Booking.Client.Model;
-using OBS_Booking_App.Services;
 using OBS_Booking_App.Models;
 using System;
 using System.Collections.Generic;
@@ -13,10 +12,10 @@ namespace OBS_Booking_App.Services.Configuration
     public class BookingService
     {
         private readonly IBookingApi? _bookingApi;
-        private readonly ILogger _logger;
+        private readonly ILogger<BookingService> _logger;
         bool booking;
 
-        public BookingService(IBookingApi? bookingApi, ILogger logger, Worker worker)
+        public BookingService(IBookingApi bookingApi, ILogger<BookingService> logger)
         {
             _bookingApi = bookingApi;
             _logger = logger;

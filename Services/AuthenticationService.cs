@@ -26,6 +26,7 @@ namespace OBS_Booking_App.Services
 
         public async Task<string> GetAccessTokenAsync(CancellationToken token)
         {   _logger.LogInformation("Starting request for authentication token from STS.");
+            Console.WriteLine("Starting request for authentication token from STS");
             var obsIdentityUrl = _servicesConfig.Value.STSServiceUrl;
 
             _logger.LogInformation($"Contacting STS Server at: '{obsIdentityUrl}' for OpenID Configuration.");

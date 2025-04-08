@@ -11,6 +11,8 @@ using OBS.LIB.Logging.Extensions;
 using OBS.Calendar.Client.Api;
 using OBS.Booking.Client.Api;
 using System.IO;
+using OBS_Booking.Services.Configuration;
+using OBS_Booking_App.Services.API;
 
 namespace OBS_Booking_App
 {
@@ -18,6 +20,8 @@ namespace OBS_Booking_App
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("Booking Simulator started\n\n");
+
             try
             {
                 CreateHostBuilder(args).Build().Run();
@@ -46,7 +50,6 @@ namespace OBS_Booking_App
                     if (useObsApi)
                     {
                         configBuilder.AddJsonFile(obsConfigPath, optional: true, reloadOnChange: true);
-                        Console.WriteLine("Booking Simulator started\n\nappsettings.OBS.Configuration.json loaded");
                     }
 
                     var configuration = configBuilder
@@ -54,102 +57,96 @@ namespace OBS_Booking_App
                         .Build();
 
                     services.AddOptions();
+                    services.AddTransient<EmployeesApiConfiguration>();
+                    services.AddTransient<EmployeesAppsettingsConfiguration>();
                     services.AddTransient<AuthenticationService>();
+                    services.AddTransient<BookingService>();
                     services.AddHostedService<Worker>();
 
                     services.Configure<ServicesConfiguration>(configuration.GetSection("Services"));
                     services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
 
-                    if (useObsApi)
+                    services.AddTransient<IPersonsApi>(provider =>
                     {
-                        services.AddTransient<IPersonsApi>(provider =>
+                        try
                         {
-                            try
+                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
+                            var obsStammUrl = servicesConfig.Value.StammServiceUrl;
+                            var personsApi = new PersonsApi($"{obsStammUrl}");
+
+                            var authenticationService = provider.GetRequiredService<AuthenticationService>();
+                            var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
+                            personsApi.Configuration = OBS.Stamm.Client.Client.Configuration.MergeConfigurations(
+                            new OBS.Stamm.Client.Client.Configuration()
                             {
-                                var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
-                                var obsStammUrl = servicesConfig.Value.StammServiceUrl;
-                                var personsApi = new PersonsApi($"{obsStammUrl}");
+                                AccessToken = accessToken
+                            },
+                            personsApi.Configuration);
 
-                                var authenticationService = provider.GetRequiredService<AuthenticationService>();
-                                var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
-                                personsApi.Configuration = OBS.Stamm.Client.Client.Configuration.MergeConfigurations(
-                                new OBS.Stamm.Client.Client.Configuration()
-                                {
-                                    AccessToken = accessToken
-                                },
-                                personsApi.Configuration);
-
-                                return personsApi;
-                            }
-                            catch
-                            {
-                                Console.WriteLine("IPersonsApi authentication is failed!\nFallback: using appsettings.json");
-                                return null;
-                            }
-                        });
-
-                        services.AddTransient<IPersonCalendarApi>(provider =>
+                            return personsApi;
+                        }
+                        catch
                         {
-                            try
-                            {
-                                var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
-                                var obsCalendarUrl = servicesConfig.Value.CalendarServiceUrl;
-                                var calendarApi = new PersonCalendarApi($"{obsCalendarUrl}");
-                                var authenticationService = provider.GetRequiredService<AuthenticationService>();
-                                var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
-                                calendarApi.Configuration = OBS.Calendar.Client.Client.Configuration.MergeConfigurations(
-                                new OBS.Calendar.Client.Client.Configuration()
-                                {
-                                    AccessToken = accessToken
-                                },
-                                calendarApi.Configuration);
+                            Console.WriteLine("Configuration IPersonsApi is failed!\nFallback: using appsettings.json");
+                            return null;
+                        }
+                    });
 
-                                return calendarApi;
-                            }
-                            catch
-                            {
-                                Console.WriteLine("IPersonCalendarApi authentication is failed!\nFallback: using appsettings.json");
-                                return null;
-                            }
-                        });
-
-                        services.AddTransient<IBookingApi>(provider =>
-                        {
-                            try
-                            {
-                                var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
-                                var obsBookingUrl = servicesConfig.Value.BookingServiceUrl;
-                                var bookingApi = new BookingApi($"{obsBookingUrl}");
-                                var authenticationService = provider.GetRequiredService<AuthenticationService>();
-                                var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
-
-                                bookingApi.Configuration = OBS.Booking.Client.Client.Configuration.MergeConfigurations(
-                                new OBS.Booking.Client.Client.Configuration()
-                                {
-                                    AccessToken = accessToken
-                                },
-                                bookingApi.Configuration);
-
-                                return bookingApi;
-                            }
-                            catch
-                            {
-                                Console.WriteLine("IBookingApi authentication is failed!");
-                                return null;
-                            }
-                        });
-                    }
-                    else
+                    services.AddTransient<IPersonCalendarApi>(provider =>
                     {
-                        Console.WriteLine("Booking Simulator started\n\nNo appsettings.OBS.Configuration.json found!\nFallback: using appsettings.json");
-                    }
+                        try
+                        {
+                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
+                            var obsCalendarUrl = servicesConfig.Value.CalendarServiceUrl;
+                            var calendarApi = new PersonCalendarApi($"{obsCalendarUrl}");
+                            var authenticationService = provider.GetRequiredService<AuthenticationService>();
+                            var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
+                            calendarApi.Configuration = OBS.Calendar.Client.Client.Configuration.MergeConfigurations(
+                            new OBS.Calendar.Client.Client.Configuration()
+                            {
+                                AccessToken = accessToken
+                            },
+                            calendarApi.Configuration);
+
+                            return calendarApi;
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Configuration IPersonCalendarApi is failed!\nFallback: using appsettings.json");
+                            return null;
+                        }
+                    });
+
+                    services.AddTransient<IBookingApi>(provider =>
+                    {
+                        try
+                        {
+                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesConfiguration>>();
+                            var obsBookingUrl = servicesConfig.Value.BookingServiceUrl;
+                            var bookingApi = new BookingApi($"{obsBookingUrl}");
+                            var authenticationService = provider.GetRequiredService<AuthenticationService>();
+                            var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
+
+                            bookingApi.Configuration = OBS.Booking.Client.Client.Configuration.MergeConfigurations(
+                            new OBS.Booking.Client.Client.Configuration()
+                            {
+                                AccessToken = accessToken
+                            },
+                            bookingApi.Configuration);
+
+                            return bookingApi;
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Configuration IBookingApi is failed!");
+                            return null;
+                        }
+                    });
 
                     if (!File.Exists("NuGet.Config"))
                     {
                         Console.WriteLine("WARNING: NuGet.Config not found. Private feeds may not work.");
-                    }
-
-                    
+                    }                    
                 });
     }
 }

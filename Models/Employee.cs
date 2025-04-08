@@ -10,7 +10,7 @@ namespace OBS_Booking_App.Models
         public DateTime? EndContract { get; }
         public DateTime? StartWork { get; }
         public DateTime? EndWork { get; }
-        public DateTime? DateOfWork { get; } = DateTime.Now;
+        public DateTime? DateOfWork { get; }
 
         public bool LoggedIn = false;
 
@@ -20,7 +20,8 @@ namespace OBS_Booking_App.Models
             DateTime? startContract,
             DateTime? endContract,
             DateTime? startWork,
-            DateTime? endWork)
+            DateTime? endWork,
+            DateTime? dateOfWork)
         {
             Id = id;
             Name = name;
@@ -28,6 +29,7 @@ namespace OBS_Booking_App.Models
             EndContract = endContract;
             StartWork = startWork;
             EndWork = endWork;
+            DateOfWork = dateOfWork;
             //StartWork = DateTime.Parse("13:20:00");       // Schichtbeginn manuell für alle Mitarbeiter festlegen.
             //EndWork = DateTime.Parse("13:23:00");         // Schichtende manuell für alle Mitarbeiter festlegen.
         }

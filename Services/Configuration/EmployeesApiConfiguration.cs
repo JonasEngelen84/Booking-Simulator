@@ -12,16 +12,26 @@ using OBS_Booking_App.Services.API;
 
 namespace OBS_Booking_App.Services.Configuration
 {
-    public class EmployeesConfiguration : IEmployeesProvider
+    public class EmployeesApiConfiguration : IEmployeesProvider
     {
+        private string id { get; set; } = null;
+        private string name { get; set; } = null;
+        private DateTime? startContract { get; set; } = null;
+        private DateTime? endContract { get; set; } = null;
+        private DateTime? startWork { get; set; } = null;
+        private DateTime? endWork { get; set; } = null;
+        private DateTime? dateOfWork { get; set; } = null;
+
         private readonly IPersonsApi _stammApi;
         private readonly IPersonCalendarApi _calenderApi;
-        private readonly IBookingApi _bookingApi;
-        private readonly ILogger _logger;
+        private readonly ILogger<EmployeesApiConfiguration> _logger;
         Random rndObj = new();
-        private List<Employee> EmployeesCache = new();
+        private List<Employee> employeesCache = new();
 
-        public EmployeesConfiguration(IPersonsApi stammApi, IPersonCalendarApi calenderApi, ILogger logger)
+        public EmployeesApiConfiguration(
+            IPersonsApi stammApi,
+            IPersonCalendarApi calenderApi,
+            ILogger<EmployeesApiConfiguration> logger)
         {
             _stammApi = stammApi;
             _calenderApi = calenderApi;
@@ -32,14 +42,6 @@ namespace OBS_Booking_App.Services.Configuration
         {
             get
             {
-                string id = null;
-                string name = null;
-                DateTime? startContract = null;
-                DateTime? endContract = null;
-                DateTime? startWork = null;
-                DateTime? endWork = null;
-                DateTime? dateOfWork = null;
-
                 foreach (var emp in _stammApi.All())
                 {
                     if (string.IsNullOrWhiteSpace(id) ||
@@ -96,16 +98,17 @@ namespace OBS_Booking_App.Services.Configuration
                     // Wenn Mitarbeiter heute berechtigt vertraglich zu arbeiten & schichtende noch nicht verstrichen ist
                     if (dateOfWork == DateTime.Now.Date && endWork > DateTime.Now && startContract <= DateTime.Now.Date && endContract > DateTime.Now.Date)
                     {
-                        EmployeesCache.Add(new Employee(
+                        employeesCache.Add(new Employee(
                             id,
                             name,
                             startContract,
                             endContract,
                             startWork,
-                            endWork));
+                            endWork,
+                            dateOfWork));
                     }
                 }
-                return EmployeesCache;
+                return employeesCache;
             }
         }
     }
