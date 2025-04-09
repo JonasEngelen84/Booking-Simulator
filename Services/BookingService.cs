@@ -31,7 +31,7 @@ namespace OBS_Booking_App.Services.Configuration
             foreach (Employee employee in employees)
             {
                 // Liegt StartWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
-                if (employee.StartWork <= DateTime.Now && employee.StartWork >= DateTime.Now.Add(TimeSpan))
+                if (employee.BookingStartWork <= DateTime.Now && employee.BookingStartWork >= DateTime.Now.Add(TimeSpan))
                 {
                     if (_bookingApi != null)
                     {

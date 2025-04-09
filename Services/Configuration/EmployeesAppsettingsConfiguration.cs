@@ -27,25 +27,24 @@ namespace OBS_Booking.Services.Configuration
                 {
                     try
                     {
-                        var startContract = DateTime.Today.AddMonths(-rnd.Next(1, 12));
-                        var endContract = DateTime.Today.AddMonths(rnd.Next(1, 12));
-
-                        var baseStart = DateTime.Today.AddHours(8);
-                        var baseEnd = DateTime.Today.AddHours(16);
+                        var baseStart = new DateTime(2025, 4, 9, 13, 30, 0);
+                        var baseEnd = new DateTime(2025, 4, 9, 13, 45, 0);
 
                         int startOffset = rnd.Next(1, 10) <= 2 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
                         int endOffset = rnd.Next(0, 10);
 
-                        var startWork = baseStart.AddMinutes(startOffset);
-                        var endWork = baseEnd.AddMinutes(endOffset);
+                        var bookingStartWork = baseStart.AddMinutes(startOffset);
+                        var bookingEndWork = baseEnd.AddMinutes(endOffset);
 
                         employeesCache.Add(new Employee(
                             config.Id,
                             config.Name,
-                            startContract,
-                            endContract,
-                            startWork,
-                            endWork,
+                            config.StartContract,
+                            config.EndContract,
+                            config.StartWork,
+                            config.EndWork,
+                            bookingStartWork,
+                            bookingEndWork,
                             DateTime.Today));
                     }
                     catch (Exception ex)

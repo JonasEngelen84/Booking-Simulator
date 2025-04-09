@@ -72,7 +72,8 @@ namespace OBS_Booking_App
                     foreach (Employee employee in employees)
                     {
                         Console.WriteLine(
-                            $"Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-8} | End work: {employee.EndWork,-8}");
+                            $"Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-8} | End work: {employee.EndWork,-8} " +
+                            $"| booking Start work: {employee.BookingStartWork,-8} | Booking End work: {employee.BookingEndWork,-8}");
                     }
                 }
 
