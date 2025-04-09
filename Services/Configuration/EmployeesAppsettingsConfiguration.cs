@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
+using OBS_Booking.Services.Configuration;
 using OBS_Booking_App.Models;
 using OBS_Booking_App.Services.API;
 using System;
 using System.Collections.Generic;
 
-namespace OBS_Booking.Services.Configuration
+namespace OBS_Booking_App.Services.Configuration
 {
     public class EmployeesAppsettingsConfiguration : IEmployeesProvider
     {
@@ -27,14 +28,11 @@ namespace OBS_Booking.Services.Configuration
                 {
                     try
                     {
-                        var baseStart = new DateTime(2025, 4, 9, 13, 30, 0);
-                        var baseEnd = new DateTime(2025, 4, 9, 13, 45, 0);
+                        int startOffset = rnd.Next(1, 10) <= 2 ? rnd.Next(0, 15) : rnd.Next(-15, 0);
+                        int endOffset = rnd.Next(0, 15);
 
-                        int startOffset = rnd.Next(1, 10) <= 2 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
-                        int endOffset = rnd.Next(0, 10);
-
-                        var bookingStartWork = baseStart.AddMinutes(startOffset);
-                        var bookingEndWork = baseEnd.AddMinutes(endOffset);
+                        var bookingStartWork = DateTime.Now;
+                        var bookingEndWork = DateTime.Now;
 
                         employeesCache.Add(new Employee(
                             config.Id,
@@ -44,8 +42,10 @@ namespace OBS_Booking.Services.Configuration
                             config.StartWork,
                             config.EndWork,
                             bookingStartWork,
-                            bookingEndWork,
-                            DateTime.Today));
+                            bookingEndWork)
+                        {
+                            LoggedIn = bookingStartWork <= DateTime.Now && bookingEndWork >= DateTime.Now
+                        });
                     }
                     catch (Exception ex)
                     {

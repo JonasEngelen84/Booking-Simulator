@@ -1,6 +1,6 @@
 ﻿namespace OBS_Booking_App.Services.Configuration
 {
-    class ServicesConfiguration
+    class ServicesObsConfiguration
     {
         public string STSServiceUrl { get; set; }
         public string StammServiceUrl { get; set; }

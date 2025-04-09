@@ -1,42 +1,24 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OBS.Booking.Client.Api;
-using OBS.Calendar.Client.Api;
-using OBS.Stamm.Client.Api;
-using OBS_Booking.Services.Configuration;
 using OBS_Booking_App.Models;
-using OBS_Booking_App.Services;
 using OBS_Booking_App.Services.Configuration;
+using OBS_Booking_App.Stores;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AuthenticationService = OBS_Booking_App.Services.AuthenticationService;
 
 namespace OBS_Booking_App
 {
     public class Worker : BackgroundService
     {
-        private readonly EmployeesApiConfiguration _apiConfig;
-        private readonly EmployeesAppsettingsConfiguration _appsettingsConfig;
-        private readonly BookingService _bookingService;
-        private readonly IPersonsApi? _stammApi;
-        private readonly IPersonCalendarApi? _calenderApi;
-        private readonly ILogger _logger;
+        private EmployeeStore _employeeStore { get; }
+        private BookingService _bookingService { get; }
+        private ILogger _logger { get; }
 
-        public Worker(
-            EmployeesApiConfiguration apiConfig,
-            EmployeesAppsettingsConfiguration appsettingsConfig,
-            BookingService bookingService,
-            IPersonsApi stammApi,
-            IPersonCalendarApi calenderApi,
-            ILogger<Worker> logger)
+        public Worker(EmployeeStore employeesStore, BookingService bookingService, ILogger<Worker> logger)
         {
-            _apiConfig = apiConfig;
-            _appsettingsConfig = appsettingsConfig;
+            _employeeStore = employeesStore;
             _bookingService = bookingService;
-            _stammApi = stammApi;
-            _calenderApi = calenderApi;
             _logger = logger;
         }
 
@@ -45,44 +27,44 @@ namespace OBS_Booking_App
             _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
             Console.WriteLine("\nBackgroundservice started: " + DateTime.Now);
 
-            List<Employee> employees = new();
-            TimeSpan timeSpan = new TimeSpan(0, 1, 0);
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (employees.Count == 0 || DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00"))
+                if (_employeeStore.Employees.Count == 0 ||
+                    DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00"))
                 {
-                    Console.WriteLine($"Check employees: {DateTime.Now}");
-
-                    if (_stammApi != null && _calenderApi != null)
-                        employees = _apiConfig.Employees;
-
-                    if (employees.Count < 6)
-                    {
-                        var fallbackEmployees = _appsettingsConfig.Employees;
-
-                        foreach (var emp in fallbackEmployees)
-                        {
-                            employees.Add(emp);
-                        }
-                    }
-
-                    Console.WriteLine($"Registered employees: {employees.Count}\n");
-
-                    foreach (Employee employee in employees)
-                    {
-                        Console.WriteLine(
-                            $"Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-8} | End work: {employee.EndWork,-8} " +
-                            $"| booking Start work: {employee.BookingStartWork,-8} | Booking End work: {employee.BookingEndWork,-8}");
-                    }
+                    _employeeStore.UpdateEmployees();
+                    DisplayRegisteredEmployees();
+                    DisplayActuallyLoggedInEmployees();
                 }
 
-                if (employees.Count > 0)
+                if (_employeeStore.Employees.Count > 0)
                 {
-                    _bookingService.ExecuteAsync(employees);
+                    await _bookingService.ExecuteAsync();
                 }                
 
                 await Task.Delay(60000, stoppingToken);
+            }
+        }
+
+        private void DisplayRegisteredEmployees()
+        {
+            Console.WriteLine($"Registered employees: {_employeeStore.Employees.Count}\n");
+            foreach (Employee employee in _employeeStore.Employees)
+            {
+                Console.WriteLine($"Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-8} " +
+                    $"| End work: {employee.EndWork,-8} | bookingStart: {employee.BookingStartWork,-8} | BookingEnd: {employee.BookingEndWork,-8}");
+            }
+        }
+
+        private void DisplayActuallyLoggedInEmployees()
+        {
+            Console.WriteLine("\nActually logged in:\n");
+            foreach (Employee employee in _employeeStore.Employees)
+            {
+                if (employee.LoggedIn)
+                {
+                    Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name,-20}logged in");
+                }
             }
         }
     }

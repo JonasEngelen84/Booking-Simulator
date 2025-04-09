@@ -2,6 +2,7 @@
 using OBS.Booking.Client.Api;
 using OBS.Booking.Client.Model;
 using OBS_Booking_App.Models;
+using OBS_Booking_App.Stores;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,27 +12,30 @@ namespace OBS_Booking_App.Services.Configuration
 {
     public class BookingService
     {
+        private readonly EmployeeStore _employeeStore;
         private readonly IBookingApi? _bookingApi;
         private readonly ILogger<BookingService> _logger;
-        bool booking;
+        private bool booking;
 
-        public BookingService(IBookingApi bookingApi, ILogger<BookingService> logger)
+        public BookingService(
+            EmployeeStore employeesStore,
+            IBookingApi bookingApi,
+            ILogger<BookingService> logger)
         {
+            _employeeStore = employeesStore;
             _bookingApi = bookingApi;
             _logger = logger;
         }
 
-        public async Task ExecuteAsync(List<Employee> employees)
+        public async Task ExecuteAsync()
         {
             _logger.LogInformation($"\nBooking process started: {DateTime.Now}");
             Console.WriteLine($"\nBooking process started: {DateTime.Now}");
 
-            TimeSpan TimeSpan = new TimeSpan(0, 1, 0);
-
-            foreach (Employee employee in employees)
+            foreach (Employee employee in _employeeStore.Employees)
             {
                 // Liegt StartWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
-                if (employee.BookingStartWork <= DateTime.Now && employee.BookingStartWork >= DateTime.Now.Add(TimeSpan))
+                if (employee.BookingStartWork >= DateTime.Now && employee.BookingStartWork <= DateTime.Now.AddMinutes(1))
                 {
                     if (_bookingApi != null)
                     {
@@ -43,10 +47,11 @@ namespace OBS_Booking_App.Services.Configuration
                     booking = true;
                     _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged IN: {DateTime.Now}");
                     Console.WriteLine($"\n{employee.Name}     \tId: {employee.Id} \tLogged IN: {DateTime.Now}");
+                    Thread.Sleep(3000);
                 }
 
                 // Liegt EndWork innerhalb der Aktuellen Zeit und aktuelle Zeit + 1 Minute
-                if (employee.EndWork <= DateTime.Now && employee.EndWork >= DateTime.Now.Add(TimeSpan))
+                if (employee.BookingEndWork <= DateTime.Now && employee.BookingEndWork >= DateTime.Now.AddMinutes(1))
                 {
                     if (_bookingApi != null)
                     {
@@ -54,12 +59,13 @@ namespace OBS_Booking_App.Services.Configuration
                         _bookingApi.Create(bookingObj);
                     }
 
+                    employee.LoggedIn = false;
                     booking = true;
+                    _employeeStore.Employees.Remove(employee);
                     _logger.LogInformation($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
                     Console.WriteLine($"\n{employee.Name}     \tId: {employee.Id} \tLogged OUT: {DateTime.Now}");
+                    Thread.Sleep(3000);
                 }
-
-                Thread.Sleep(3000);
             }
 
             if (booking == true)
@@ -69,7 +75,7 @@ namespace OBS_Booking_App.Services.Configuration
                 _logger.LogInformation("\n\nActually logged in:");
                 Console.WriteLine("\n\nActually logged in:");
 
-                foreach (Employee employee in employees)
+                foreach (Employee employee in _employeeStore.Employees)
                 {
                     if (employee.LoggedIn)
                     {
@@ -79,8 +85,9 @@ namespace OBS_Booking_App.Services.Configuration
                         loggedIn++;
                     }
                 }
-                _logger.LogInformation($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
-                Console.WriteLine($"{loggedIn} Employees are Logged in: {DateTime.Now}\n\nBooking done\n");
+
+                _logger.LogInformation($"{loggedIn} Employees logged in: {DateTime.Now}");
+                Console.WriteLine($"{loggedIn} Employees logged in: {DateTime.Now}");
             }
         }
     }

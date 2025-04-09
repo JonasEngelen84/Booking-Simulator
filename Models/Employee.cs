@@ -12,9 +12,8 @@ namespace OBS_Booking_App.Models
         public DateTime? EndWork { get; }
         public DateTime BookingStartWork { get; }
         public DateTime BookingEndWork { get; }
-        public DateTime? DateOfWork { get; }
 
-        public bool LoggedIn = false;
+        public bool LoggedIn { get; set; }
 
         public Employee(
             string id,
@@ -24,8 +23,7 @@ namespace OBS_Booking_App.Models
             DateTime? startWork,
             DateTime? endWork,
             DateTime bookingStartWork,
-            DateTime bookingEndWork,
-            DateTime? dateOfWork)
+            DateTime bookingEndWork)
         {
             Id = id;
             Name = name;
@@ -35,9 +33,6 @@ namespace OBS_Booking_App.Models
             EndWork = endWork;
             BookingStartWork = bookingStartWork;
             BookingEndWork = bookingEndWork;
-            DateOfWork = dateOfWork;
-            //StartWork = DateTime.Parse("13:20:00");       // Schichtbeginn manuell für alle Mitarbeiter festlegen.
-            //EndWork = DateTime.Parse("13:23:00");         // Schichtende manuell für alle Mitarbeiter festlegen.
         }
     }
 }
