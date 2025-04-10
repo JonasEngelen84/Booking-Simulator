@@ -16,7 +16,9 @@ namespace OBS_Booking_App.Services.Configuration
         private readonly EmployeeStore _employeeStore;
         private readonly IBookingApi? _bookingApi;
         private readonly ILogger<BookingService> _logger;
-        private bool booking;
+
+        private bool bookingServiceStarted = true;
+        private bool booking = false;
 
         public BookingService(
             EmployeeStore employeesStore,
@@ -31,7 +33,6 @@ namespace OBS_Booking_App.Services.Configuration
         public async Task ExecuteAsync()
         {
             List<Employee> employees = new(_employeeStore.Employees);
-            int count = 0;
 
             foreach (Employee employee in employees)
             {
@@ -39,45 +40,13 @@ namespace OBS_Booking_App.Services.Configuration
 
                 if (employee.BookingStartWork >= timeNow && employee.BookingStartWork <= timeNow.AddMinutes(1))
                 {
-                    if (count == 0)
-                    {
-                        Console.WriteLine("\nBooking Service started:");
-                        count++;
-                    }
-
-                    if (_bookingApi != null)
-                    {
-                        CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, timeNow, default, employee.Id, null);
-                        _bookingApi.Create(bookingObj);
-                    }
-
-                    employee.LoggedIn = true;
-                    booking = true;
-                    _logger.LogInformation($"Id: {employee.Id,-8}Name: {employee.Name,-20} log IN: {timeNow}");
-                    Console.WriteLine($"Id: {employee.Id,-8}Name: {employee.Name,-20} log IN: {timeNow}");
-                    Thread.Sleep(3000);
+                    await LoggingProcess(employee, true, "logged IN");
                 }
 
                 if (employee.BookingEndWork >= timeNow && employee.BookingEndWork <= timeNow.AddMinutes(1))
                 {
-                    if (count == 0)
-                    {
-                        Console.WriteLine("\nBooking Service started:");
-                        count++;
-                    }
-
-                    if (_bookingApi != null)
-                    {
-                        CreateBookingModel bookingObj = new(0, BookingType.ARRIVE, timeNow, default, employee.Id, null);
-                        _bookingApi.Create(bookingObj);
-                    }
-
-                    employee.LoggedIn = false;
-                    booking = true;
+                    await LoggingProcess(employee,false, "logged OUT");
                     _employeeStore.Employees.Remove(employee);
-                    _logger.LogInformation($"Id: {employee.Id,-8}Name: {employee.Name,-20}log OUT: {timeNow}");
-                    Console.WriteLine($"Id: {employee.Id,-8}Name: {employee.Name,-20}log OUT: {timeNow}");
-                    Thread.Sleep(3000);
                 }
             }
 
@@ -96,6 +65,33 @@ namespace OBS_Booking_App.Services.Configuration
 
                 booking = false;
             }
+        }
+
+        private async Task LoggingProcess(Employee employee, bool logged, string log)
+        {
+            if (bookingServiceStarted)
+            {
+                Console.WriteLine("\nBooking Service started:");
+                bookingServiceStarted = false;
+            }
+
+            if (_bookingApi != null)
+            {
+                CreateBookingModel bookingObj;
+
+                if (logged)
+                    bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
+                else
+                    bookingObj = new(0, BookingType.LEAVE, DateTime.Now, default, employee.Id, null);
+
+                await _bookingApi.CreateAsync(bookingObj);
+            }                
+
+            employee.LoggedIn = logged;
+            _logger.LogInformation($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");
+            Console.WriteLine($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");
+            booking = true;
+            await Task.Delay(3000);
         }
     }
 }
