@@ -1,6 +1,5 @@
 ﻿using OBS.Calendar.Client.Api;
 using OBS.Stamm.Client.Api;
-using OBS_Booking.Services.Configuration;
 using OBS_Booking_App.Models;
 using OBS_Booking_App.Services.Configuration;
 using System;
@@ -32,7 +31,7 @@ namespace OBS_Booking_App.Stores
 
         public void UpdateEmployees()
         {
-            Console.WriteLine($"Update employees: {DateTime.Now}");
+            Console.WriteLine($"\nUpdate employees: {DateTime.Now}\n");
             if (_stammApi != null && _calenderApi != null)
                 _employees = _apiConfig.Employees;
 

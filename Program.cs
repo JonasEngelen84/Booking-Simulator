@@ -2,18 +2,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OBS.Booking.Client.Api;
+using OBS.Calendar.Client.Api;
+using OBS.LIB.Logging.Extensions;
 using OBS.Stamm.Client.Api;
 using OBS_Booking_App.Services;
 using OBS_Booking_App.Services.Configuration;
+using OBS_Booking_App.Stores;
 using Serilog;
 using System;
-using OBS.LIB.Logging.Extensions;
-using OBS.Calendar.Client.Api;
-using OBS.Booking.Client.Api;
 using System.IO;
-using OBS_Booking.Services.Configuration;
-using OBS_Booking_App.Services.API;
-using OBS_Booking_App.Stores;
 
 namespace OBS_Booking_App
 {

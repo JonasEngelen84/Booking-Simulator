@@ -6,8 +6,6 @@ namespace OBS_Booking_App.Models
     {
         public string Id { get; }
         public string Name { get; }
-        public DateTime? StartContract { get; }
-        public DateTime? EndContract { get; }
         public DateTime? StartWork { get; }
         public DateTime? EndWork { get; }
         public DateTime BookingStartWork { get; }
@@ -18,8 +16,6 @@ namespace OBS_Booking_App.Models
         public Employee(
             string id,
             string name,
-            DateTime? startContract,
-            DateTime? endContract,
             DateTime? startWork,
             DateTime? endWork,
             DateTime bookingStartWork,
@@ -27,8 +23,6 @@ namespace OBS_Booking_App.Models
         {
             Id = id;
             Name = name;
-            StartContract = startContract;
-            EndContract = endContract;
             StartWork = startWork;
             EndWork = endWork;
             BookingStartWork = bookingStartWork;
