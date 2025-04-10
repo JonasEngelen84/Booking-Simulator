@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <UserSecretsId>dotnet-OBS_Booking-F18931F1-C456-4C15-889F-5011179C83CD</UserSecretsId>
     <RootNamespace>OBS_Booking</RootNamespace>
   </PropertyGroup>
