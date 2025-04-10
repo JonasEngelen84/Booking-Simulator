@@ -54,8 +54,3 @@ Edit appsettings.OBS.Configuration.json with your API URLs and authentication de
 
  dotnet run
 
-
-⚖ License
-
-This project is licensed under a proprietary license. See the LICENSE file for details.
-
