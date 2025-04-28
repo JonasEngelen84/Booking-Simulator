@@ -20,8 +20,6 @@ namespace OBS_Booking_App
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Booking Simulator started\n");
-
             try
             {
                 CreateHostBuilder(args).Build().Run();

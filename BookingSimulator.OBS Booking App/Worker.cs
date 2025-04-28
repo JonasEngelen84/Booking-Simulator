@@ -26,8 +26,8 @@ namespace OBS_Booking_App
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("\nBackgroundservice started: " + DateTime.Now);
-            Console.WriteLine("\nBackgroundservice started: " + DateTime.Now);
+            _logger.LogInformation("Backgroundservice started: " + DateTime.Now);
+            Console.WriteLine("Backgroundservice started: " + DateTime.Now);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -63,8 +63,8 @@ namespace OBS_Booking_App
 
         private void DisplayActuallyLoggedInEmployees()
         {
-            _logger.LogInformation($"\n\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
-            Console.WriteLine($"\n\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
+            _logger.LogInformation($"\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
+            Console.WriteLine($"\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
 
             foreach (Employee employee in _employeeStore.Employees)
             {
