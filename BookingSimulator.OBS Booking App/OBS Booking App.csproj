@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <UserSecretsId>dotnet-OBS_Booking-F18931F1-C456-4C15-889F-5011179C83CD</UserSecretsId>
-    <RootNamespace>OBS_Booking</RootNamespace>
+    <RootNamespace>OBS_Booking_App</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,6 +2,7 @@
 using OBS.Booking.Client.Api;
 using OBS.Booking.Client.Model;
 using OBS_Booking_App.Models;
+using OBS_Booking_App.Services.API;
 using OBS_Booking_App.Stores;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace OBS_Booking_App.Services.Configuration
     public class BookingService
     {
         private readonly EmployeeStore _employeeStore;
-        private readonly IBookingApi? _bookingApi;
+        private readonly IObsBookingServiceAdapter _obsBookingAdapter;
         private readonly ILogger<BookingService> _logger;
 
         private bool bookingServiceStarted = true;
@@ -22,11 +23,11 @@ namespace OBS_Booking_App.Services.Configuration
 
         public BookingService(
             EmployeeStore employeesStore,
-            IBookingApi bookingApi,
+            IObsBookingServiceAdapter obsBookingAdapter,
             ILogger<BookingService> logger)
         {
             _employeeStore = employeesStore;
-            _bookingApi = bookingApi;
+            _obsBookingAdapter = obsBookingAdapter;
             _logger = logger;
         }
 
@@ -40,12 +41,12 @@ namespace OBS_Booking_App.Services.Configuration
 
                 if (employee.BookingStartWork >= timeNow && employee.BookingStartWork <= timeNow.AddMinutes(1))
                 {
-                    await LoggingProcess(employee, true, "logged IN");
+                    await LoggingProcessAsync(employee, true, "logged IN");
                 }
 
                 if (employee.BookingEndWork >= timeNow && employee.BookingEndWork <= timeNow.AddMinutes(1))
                 {
-                    await LoggingProcess(employee,false, "logged OUT");
+                    await LoggingProcessAsync(employee, false, "logged OUT");
                     _employeeStore.Employees.Remove(employee);
                 }
             }
@@ -67,7 +68,7 @@ namespace OBS_Booking_App.Services.Configuration
             }
         }
 
-        private async Task LoggingProcess(Employee employee, bool logged, string log)
+        private async Task LoggingProcessAsync(Employee employee, bool logged, string log)
         {
             if (bookingServiceStarted)
             {
@@ -75,17 +76,14 @@ namespace OBS_Booking_App.Services.Configuration
                 bookingServiceStarted = false;
             }
 
-            if (_bookingApi != null)
+            try
             {
-                CreateBookingModel bookingObj;
-
-                if (logged)
-                    bookingObj = new(0, BookingType.ARRIVE, DateTime.Now, default, employee.Id, null);
-                else
-                    bookingObj = new(0, BookingType.LEAVE, DateTime.Now, default, employee.Id, null);
-
-                await _bookingApi.CreateAsync(bookingObj);
-            }                
+                await _obsBookingAdapter.CreateBookingAsync(employee, logged ? BookingAction.Arrive : BookingAction.Leave);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("Connection to IBookingApi failed."+ ex.ToString());
+            }
 
             employee.LoggedIn = logged;
             _logger.LogInformation($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");

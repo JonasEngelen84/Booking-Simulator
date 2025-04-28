@@ -34,23 +34,29 @@ namespace OBS_Booking_App.Services.Configuration
         {
             get
             {
-                foreach (var emp in _stammApi.All())
+                if (_stammApi != null && _calendarApi != null)
                 {
-                    try
-                    {
-                        if (CheckData(emp))
-                            continue;
+                    Console.WriteLine("Try using OBS.API.Configuration");
 
-                        _id = emp.Id;
-                        _name = emp.Name;
-
-                        CreateEmployee();
-                    }
-                    catch (Exception ex)
+                    foreach (var emp in _stammApi.All())
                     {
-                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}\n {ex.ToString()}");
-                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}\n {ex.ToString()}");
+                        try
+                        {
+                            if (!CheckData(emp))
+                                continue;
+
+                            _id = emp.Id;
+                            _name = emp.Name;
+
+                            CreateEmployee();
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogInformation($"\nEmployee configuration is failed\nEmployeeId: {emp.Id,-10} - Name: {emp.Name}\n {ex.ToString()}");
+                            Console.WriteLine($"\nEmployee configuration is failed\nEmployeeId: {emp.Id,-10} - Name: {emp.Name}\n {ex.ToString()}");
+                        }
                     }
+                    
                 }
                 return employeesCache;
             }
@@ -59,18 +65,18 @@ namespace OBS_Booking_App.Services.Configuration
         private bool CheckData(SimplePersonApiModel emp)
         {
             if (string.IsNullOrWhiteSpace(emp.Id) ||
-                        string.IsNullOrWhiteSpace(emp.Name) ||
-                        emp.DateOfEntry == null ||
-                        emp.DateOfLeaving == null)
+                string.IsNullOrWhiteSpace(emp.Name) ||
+                emp.DateOfEntry == null ||
+                emp.DateOfEntry <= DateTime.Now.Date ||
+                emp.DateOfLeaving == null ||
+                emp.DateOfLeaving > DateTime.Now.Date)
             {
-                _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}");
-                Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}");
-                return true;
-            }
-            else if (emp.DateOfEntry <= DateTime.Now.Date || emp.DateOfLeaving > DateTime.Now.Date)
-                return true;
-            else
+                _logger.LogInformation($"Employee configuration is failed! Id: {emp.Id,-10} - Name: {emp.Name}");
+                Console.WriteLine($"Employee configuration is failed! Id: {emp.Id,-10} - Name: {emp.Name}");
                 return false;
+            }
+            else
+                return true;
         }
 
         private void CreateEmployee()

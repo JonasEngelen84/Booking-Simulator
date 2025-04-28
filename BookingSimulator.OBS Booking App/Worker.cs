@@ -57,7 +57,7 @@ namespace OBS_Booking_App
             Console.WriteLine($"Registered employees: {_employeeStore.Employees.Count}");
             foreach (Employee employee in _employeeStore.Employees)
             {
-                Console.WriteLine($"| Id: {employee.Id,-5} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-22} | End work: {employee.EndWork} |");
+                Console.WriteLine($"| Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-22} | End work: {employee.EndWork} |");
             }
         }
 
@@ -70,7 +70,7 @@ namespace OBS_Booking_App
             {
                 if (employee.LoggedIn)
                 {
-                    Console.WriteLine($"Id: {employee.Id}   Name: {employee.Name}");
+                    Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name}");
                 }
             }
         }

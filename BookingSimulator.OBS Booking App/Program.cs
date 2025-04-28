@@ -7,6 +7,7 @@ using OBS.Calendar.Client.Api;
 using OBS.LIB.Logging.Extensions;
 using OBS.Stamm.Client.Api;
 using OBS_Booking_App.Services;
+using OBS_Booking_App.Services.API;
 using OBS_Booking_App.Services.Configuration;
 using OBS_Booking_App.Stores;
 using Serilog;
@@ -19,7 +20,7 @@ namespace OBS_Booking_App
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Booking Simulator started\n\n");
+            Console.WriteLine("Booking Simulator started\n");
 
             try
             {
@@ -56,11 +57,12 @@ namespace OBS_Booking_App
                         .Build();
 
                     services.AddOptions();
-                    services.AddSingleton<EmployeesApiConfiguration>();
-                    services.AddSingleton<EmployeesAppsettingsConfiguration>();
+                    services.AddSingleton<IEmployeesProvider, EmployeesApiConfiguration>();
+                    services.AddSingleton<IEmployeesProvider, EmployeesAppsettingsConfiguration>();
                     services.AddSingleton<AuthenticationService>();
-                    services.AddSingleton<BookingService>();
                     services.AddSingleton<EmployeeStore>();
+                    services.AddSingleton<BookingService>();
+                    services.AddSingleton<IObsBookingServiceAdapter, ObsBookingServiceAdapter>();
                     services.AddHostedService<Worker>();
 
                     services.Configure<ServicesObsConfiguration>(configuration.GetSection("Services"));
@@ -126,7 +128,6 @@ namespace OBS_Booking_App
                             var bookingApi = new BookingApi($"{obsBookingUrl}");
                             var authenticationService = provider.GetRequiredService<AuthenticationService>();
                             var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
-
                             bookingApi.Configuration = OBS.Booking.Client.Client.Configuration.MergeConfigurations(
                             new OBS.Booking.Client.Client.Configuration()
                             {
