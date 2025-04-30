@@ -33,6 +33,7 @@ namespace OBS_Booking_App.Services.Configuration
 
         public async Task ExecuteAsync()
         {
+            bookingServiceStarted = true;
             List<Employee> employees = new(_employeeStore.Employees);
 
             foreach (Employee employee in employees)

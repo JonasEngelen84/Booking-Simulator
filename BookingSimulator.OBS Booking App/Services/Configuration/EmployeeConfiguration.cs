@@ -6,6 +6,6 @@ namespace OBS_Booking.Services.Configuration
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime EndWork { get; set; }
+        public DateTime StartWork { get; set; }
     }
 }

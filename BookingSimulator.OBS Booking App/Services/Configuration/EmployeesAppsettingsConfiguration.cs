@@ -33,19 +33,19 @@ namespace OBS_Booking_App.Services.Configuration
                 {
                     try
                     {
-                        DateTime startWork = config.EndWork.AddHours(-8);
+                        DateTime endWork = config.StartWork.AddHours(+8);
 
-                        int startOffset = rnd.Next(1, 10) <= 2 ? rnd.Next(0, 15) : rnd.Next(-15, 0);
-                        int endOffset = rnd.Next(0, 15);
+                        int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
+                        int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
 
-                        var bookingStartWork = startWork.AddMinutes(startOffset);
-                        var bookingEndWork = config.EndWork.AddMinutes(endOffset);
+                        var bookingStartWork = config.StartWork.AddMinutes(startOffset);
+                        var bookingEndWork = endWork.AddMinutes(endOffset);
 
                         employeesCache.Add(new Employee(
                             config.Id,
                             config.Name,
-                            startWork,
-                            config.EndWork,
+                            config.StartWork,
+                            endWork,
                             bookingStartWork,
                             bookingEndWork)
                         {
@@ -54,8 +54,8 @@ namespace OBS_Booking_App.Services.Configuration
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {config.Id} - Name: {config.Name}\n {ex.ToString()}");
-                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {config.Id} - Name: {config.Name}\n {ex.ToString()}");
+                        _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {config.Id} Name: {config.Name}\n {ex.ToString()}");
+                        Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {config.Id} Name: {config.Name}\n {ex.ToString()}");
                     }
                 }
                 return employeesCache;

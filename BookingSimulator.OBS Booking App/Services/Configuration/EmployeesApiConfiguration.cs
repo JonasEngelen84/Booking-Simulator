@@ -52,8 +52,8 @@ namespace OBS_Booking_App.Services.Configuration
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogInformation($"\nEmployee configuration is failed\nEmployeeId: {emp.Id,-10} - Name: {emp.Name}\n {ex.ToString()}");
-                            Console.WriteLine($"\nEmployee configuration is failed\nEmployeeId: {emp.Id,-10} - Name: {emp.Name}\n {ex.ToString()}");
+                            _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
+                            Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
                         }
                     }
                     
@@ -71,8 +71,8 @@ namespace OBS_Booking_App.Services.Configuration
                 emp.DateOfLeaving == null ||
                 emp.DateOfLeaving > DateTime.Now.Date)
             {
-                _logger.LogInformation($"Employee configuration is failed! Id: {emp.Id,-10} - Name: {emp.Name}");
-                Console.WriteLine($"Employee configuration is failed! Id: {emp.Id,-10} - Name: {emp.Name}");
+                _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
+                Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
                 return false;
             }
             else
@@ -85,8 +85,8 @@ namespace OBS_Booking_App.Services.Configuration
             {
                 if (employeeCalendarDetails.EndTime == null || employeeCalendarDetails.StartTime == null)
                 {
-                    _logger.LogInformation($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}");
-                    Console.WriteLine($"\n\nEmployee configuration is failed\nEmployeeId: {_id} - Name: {_name}");
+                    _logger.LogInformation($"Employee configuration is failed!   Id: {_id} Name: {_name}");
+                    Console.WriteLine($"Employee configuration is failed!   Id: {_id} Name: {_name}");
                     continue;
                 }
 
@@ -97,8 +97,8 @@ namespace OBS_Booking_App.Services.Configuration
                 var endWork = employeeCalendarDetails.EndTime;
 
                 Random rnd = new();
-                int startOffset = rnd.Next(1, 10) <= 2 ? rnd.Next(0, 15) : rnd.Next(-15, 0);
-                int endOffset = rnd.Next(0, 15);
+                int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
+                int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
 
                 var bookingStartWork = startWork.Value.AddMinutes(startOffset);
                 var bookingEndWork = endWork.Value.AddMinutes(endOffset);
