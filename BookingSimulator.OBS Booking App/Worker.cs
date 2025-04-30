@@ -26,12 +26,12 @@ namespace OBS_Booking_App
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Backgroundservice started: " + DateTime.Now);
-            Console.WriteLine("Backgroundservice started: " + DateTime.Now);
+            _logger.LogInformation($"{DateTime.Now} Backgroundservice started");
+            Console.WriteLine($"{DateTime.Now} Backgroundservice started");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_employeeStore.Employees.Count == 0 || (DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00")))
+                if (_employeeStore.Employees.Count == 0 || (DateTime.Now >= DateTime.Parse("01:06:00") && DateTime.Now <= DateTime.Parse("01:07:00")))
                 {
                     _employeeStore.UpdateEmployees();
                     DisplayRegisteredEmployees();

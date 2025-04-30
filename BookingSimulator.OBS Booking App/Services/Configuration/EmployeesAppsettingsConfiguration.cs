@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OBS_Booking.Services.Configuration;
 using OBS_Booking_App.Models;
@@ -33,18 +34,25 @@ namespace OBS_Booking_App.Services.Configuration
                 {
                     try
                     {
-                        DateTime endWork = config.StartWork.AddHours(+8);
+                        DateTime startWork = config.StartWork;
+                        DateTime endWork = config.EndWork;
+
+                        if (startWork.TimeOfDay.Equals(new TimeSpan(22, 0, 1)))
+                        {
+                            startWork = startWork.AddDays(-1);
+                            endWork = startWork.AddHours(8);
+                        }
 
                         int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
                         int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
 
-                        var bookingStartWork = config.StartWork.AddMinutes(startOffset);
+                        var bookingStartWork = startWork.AddMinutes(startOffset);
                         var bookingEndWork = endWork.AddMinutes(endOffset);
 
                         employeesCache.Add(new Employee(
                             config.Id,
                             config.Name,
-                            config.StartWork,
+                            startWork,
                             endWork,
                             bookingStartWork,
                             bookingEndWork)

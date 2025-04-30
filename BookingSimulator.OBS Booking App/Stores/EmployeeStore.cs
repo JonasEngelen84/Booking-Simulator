@@ -23,7 +23,7 @@ namespace OBS_Booking_App.Stores
 
         public void UpdateEmployees()
         {
-            Console.WriteLine($"Update employees: {DateTime.Now}");
+            Console.WriteLine($"\n{DateTime.Now} Update employees");
 
             var employeesApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
             var appsettingsProvider = _providers.OfType<EmployeesAppsettingsConfiguration>().FirstOrDefault();
