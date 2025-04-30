@@ -36,8 +36,6 @@ namespace OBS_Booking_App.Services.Configuration
             {
                 if (_stammApi != null && _calendarApi != null)
                 {
-                    Console.WriteLine("Try using OBS.API.Configuration");
-
                     foreach (var emp in _stammApi.All())
                     {
                         try
@@ -53,7 +51,7 @@ namespace OBS_Booking_App.Services.Configuration
                         catch (Exception ex)
                         {
                             _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
-                            Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
+                            //Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
                         }
                     }
                     
@@ -72,7 +70,7 @@ namespace OBS_Booking_App.Services.Configuration
                 emp.DateOfLeaving > DateTime.Now.Date)
             {
                 _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
-                Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
+                //Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
                 return false;
             }
             else
@@ -86,7 +84,7 @@ namespace OBS_Booking_App.Services.Configuration
                 if (employeeCalendarDetails.EndTime == null || employeeCalendarDetails.StartTime == null)
                 {
                     _logger.LogInformation($"Employee configuration is failed!   Id: {_id} Name: {_name}");
-                    Console.WriteLine($"Employee configuration is failed!   Id: {_id} Name: {_name}");
+                    //Console.WriteLine($"Employee configuration is failed!   Id: {_id} Name: {_name}");
                     continue;
                 }
 

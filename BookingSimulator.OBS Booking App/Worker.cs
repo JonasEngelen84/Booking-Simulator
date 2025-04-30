@@ -27,11 +27,10 @@ namespace OBS_Booking_App
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation($"{DateTime.Now} Backgroundservice started");
-            Console.WriteLine($"{DateTime.Now} Backgroundservice started");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_employeeStore.Employees.Count == 0 || (DateTime.Now >= DateTime.Parse("01:06:00") && DateTime.Now <= DateTime.Parse("01:07:00")))
+                if (_employeeStore.Employees.Count == 0 || (DateTime.Now >= DateTime.Parse("00:00:00") && DateTime.Now <= DateTime.Parse("00:01:00")))
                 {
                     _employeeStore.UpdateEmployees();
                     DisplayRegisteredEmployees();
@@ -54,7 +53,7 @@ namespace OBS_Booking_App
 
         private void DisplayRegisteredEmployees()
         {
-            Console.WriteLine($"Registered employees: {_employeeStore.Employees.Count}");
+            Console.WriteLine($"\nRegistered employees: {_employeeStore.Employees.Count}");
             foreach (Employee employee in _employeeStore.Employees)
             {
                 Console.WriteLine($"| Id: {employee.Id,-10} | Name: {employee.Name,-20} | Start work: {employee.StartWork,-22} | End work: {employee.EndWork} |");
@@ -63,8 +62,8 @@ namespace OBS_Booking_App
 
         private void DisplayActuallyLoggedInEmployees()
         {
-            _logger.LogInformation($"\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
-            Console.WriteLine($"\n{DateTime.Now} actually logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
+            _logger.LogInformation($"\nLogged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
+            Console.WriteLine($"\nLogged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
 
             foreach (Employee employee in _employeeStore.Employees)
             {
@@ -73,6 +72,8 @@ namespace OBS_Booking_App
                     Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name}");
                 }
             }
+
+            Console.WriteLine($"\n{DateTime.Now} Backgroundservice started\n");
         }
     }
 }

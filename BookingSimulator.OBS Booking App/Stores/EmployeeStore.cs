@@ -23,7 +23,7 @@ namespace OBS_Booking_App.Stores
 
         public void UpdateEmployees()
         {
-            Console.WriteLine($"\n{DateTime.Now} Update employees");
+            Console.WriteLine($"\n{DateTime.Now} Update employees\nTry using OBS.API.Configuration");
 
             var employeesApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
             var appsettingsProvider = _providers.OfType<EmployeesAppsettingsConfiguration>().FirstOrDefault();
@@ -34,7 +34,7 @@ namespace OBS_Booking_App.Stores
             }
             else
             {
-                Console.WriteLine("\nUsing appsettings.Configuration");
+                Console.WriteLine("OBS.API.Configuration failed!\nUsing appsettings.Configuration");
                 _employees = new List<Employee>(appsettingsProvider.Employees);
             }
         }

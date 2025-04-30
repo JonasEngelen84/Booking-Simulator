@@ -22,6 +22,7 @@ namespace OBS_Booking_App
         {
             try
             {
+                Console.WriteLine("Booking Simulator started\n");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
