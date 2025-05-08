@@ -23,14 +23,13 @@ namespace OBS_Booking_App.Stores
 
         public void UpdateEmployees()
         {
-            Console.WriteLine($"\n{DateTime.Now} Update employees\nTry using OBS.API.Configuration");
-
-            var employeesApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
+            var ObsApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
             var appsettingsProvider = _providers.OfType<EmployeesAppsettingsConfiguration>().FirstOrDefault();
 
-            if (employeesApiProvider != null && employeesApiProvider.Employees.Count >= 25)
+            var apiEmployees = ObsApiProvider.Employees;
+            if (apiEmployees != null && apiEmployees.Count >= 25)
             {
-                _employees = new List<Employee>(employeesApiProvider.Employees);
+                _employees = new List<Employee>(apiEmployees);
             }
             else
             {

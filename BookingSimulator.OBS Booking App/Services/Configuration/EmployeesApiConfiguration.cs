@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OBS.Calendar.Client.Api;
+using OBS.Calendar.Client.Model;
 using OBS.Stamm.Client.Api;
 using OBS.Stamm.Client.Model;
 using OBS_Booking_App.Models;
@@ -11,9 +12,6 @@ namespace OBS_Booking_App.Services.Configuration
 {
     public class EmployeesApiConfiguration : IEmployeesProvider
     {
-        private string _id;
-        private string _name;
-
         List<Employee> employeesCache = new();
 
         private readonly IPersonsApi _stammApi;
@@ -34,84 +32,85 @@ namespace OBS_Booking_App.Services.Configuration
         {
             get
             {
-                if (_stammApi != null && _calendarApi != null)
+                if (_stammApi == null || _calendarApi == null)
+                    return employeesCache;
+
+                foreach (var emp in _stammApi.All())
                 {
-                    foreach (var emp in _stammApi.All())
+                    try
                     {
-                        try
-                        {
-                            if (!CheckData(emp))
-                                continue;
+                        ValidateEmployeeData(emp);
 
-                            _id = emp.Id;
-                            _name = emp.Name;
-
-                            CreateEmployee();
-                        }
-                        catch (Exception ex)
+                        var calendarEntries = _calendarApi.GetSimpleFromNumberAndDateAsync(emp.Id, DateTime.Now.Date.ToUniversalTime());
+                        DateTime? startTime = null;
+                        DateTime? endTime = null;
+                        foreach (var entry in calendarEntries)
                         {
-                            _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
-                            //Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}\n {ex.ToString()}");
+                            ValidateCalendarEntry(entry);
+                            startTime = entry.StartTime;
+                            endTime = entry.EndTime;
                         }
+
+                        CreateEmployee(emp.Id, emp.Name, startTime, endTime);
                     }
-                    
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Employee data failure: {ex.Message}");
+                    }
                 }
+
                 return employeesCache;
             }
         }
 
-        private bool CheckData(SimplePersonApiModel emp)
+        private void ValidateEmployeeData(SimplePersonApiModel emp)
         {
-            if (string.IsNullOrWhiteSpace(emp.Id) ||
-                string.IsNullOrWhiteSpace(emp.Name) ||
-                emp.DateOfEntry == null ||
-                emp.DateOfEntry <= DateTime.Now.Date ||
-                emp.DateOfLeaving == null ||
-                emp.DateOfLeaving > DateTime.Now.Date)
-            {
-                _logger.LogInformation($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
-                //Console.WriteLine($"Employee configuration is failed!   Id: {emp.Id,-10} Name: {emp.Name}");
-                return false;
-            }
-            else
-                return true;
+            if (string.IsNullOrWhiteSpace(emp.Id))
+                throw new ArgumentException("Employee ID is invalid.");
+
+            if (string.IsNullOrWhiteSpace(emp.Name))
+                throw new ArgumentException("Employee name is invalid.");
+
+            //if (emp.DateOfEntry == null || emp.DateOfEntry <= DateTime.Now.Date)
+            //    throw new ArgumentException($"Invalid entry date for employee: {emp.Name}");
+
+            //if (emp.DateOfLeaving == null || emp.DateOfLeaving > DateTime.Now.Date)
+            //    throw new ArgumentException($"Invalid leaving date for employee: {emp.Name}");
         }
 
-        private void CreateEmployee()
+        private void ValidateCalendarEntry(SimplePersonCalendarApiModel entry)
         {
-            foreach (var employeeCalendarDetails in _calendarApi.GetSimpleFromNumberAndDateAsync(_id, DateTime.Now.Date.ToUniversalTime()))
+            if (entry.StartTime == null || entry.EndTime == null)
+                throw new ArgumentException($"Invalid StartTime or EndTime for employee: {entry.PersonId}");
+
+            //if (entry.Date.Date != DateTime.Now.Date && entry.Date.Date != DateTime.Now.Date.AddDays(-1))
+            //    throw new ArgumentException($"Kalendereintrag ist weder für heute ({today}) noch gestern ({yesterday}).");
+        }
+
+        private void CreateEmployee(string id, string name, DateTime? startWork, DateTime? endWork)
+        {
+            var (bookingStart, bookingEnd) = GenerateBookingTimes(startWork, endWork);
+
+            employeesCache.Add(new Employee(
+                    id,
+                    name,
+                    startWork,
+                    endWork,
+                    bookingStart,
+                    bookingEnd)
             {
-                if (employeeCalendarDetails.EndTime == null || employeeCalendarDetails.StartTime == null)
-                {
-                    _logger.LogInformation($"Employee configuration is failed!   Id: {_id} Name: {_name}");
-                    //Console.WriteLine($"Employee configuration is failed!   Id: {_id} Name: {_name}");
-                    continue;
-                }
+                LoggedIn = bookingStart <= DateTime.Now && bookingEnd >= DateTime.Now
+            });
+        }
 
-                if (employeeCalendarDetails.Date != DateTime.Now.Date || employeeCalendarDetails.Date != DateTime.Now.Date.AddDays(-1))
-                    continue;
+        private (DateTime bookingStart, DateTime bookingEnd) GenerateBookingTimes(DateTime? start, DateTime? end)
+        {
+            var rnd = new Random();
 
-                var startWork = employeeCalendarDetails.StartTime;
-                var endWork = employeeCalendarDetails.EndTime;
+            int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
+            int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
 
-                Random rnd = new();
-                int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
-                int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
-
-                var bookingStartWork = startWork.Value.AddMinutes(startOffset);
-                var bookingEndWork = endWork.Value.AddMinutes(endOffset);
-
-                employeesCache.Add(new Employee(
-                        _id,
-                        _name,
-                        startWork,
-                        endWork,
-                        bookingStartWork,
-                        bookingEndWork)
-                {
-                    LoggedIn = bookingStartWork <= DateTime.Now && bookingEndWork >= DateTime.Now
-                });
-            }
+            return (start.Value.AddMinutes(startOffset), end.Value.AddMinutes(endOffset));
         }
     }
 }
