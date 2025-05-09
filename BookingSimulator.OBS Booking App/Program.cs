@@ -38,12 +38,16 @@ namespace OBS_Booking_App
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .AddObsLogging()
+                .AddObsLogging()    // OBS-spezifisches Logging
                 .ConfigureServices((hostContext, services) =>
                 {
+                    // Konfiguration aus appsettings.json laden.
+                    // optional: besagt ob diese Datei zwingend ist
+                    // reloadOnChange: Datei wird automatisch neu eingelesen, wenn sie zur Laufzeit verändert wird
                     var configBuilder = new ConfigurationBuilder()
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
+                    // Wenn appsettings.OBS.Configuration.json vorhanden => OBS-spezifische Konfiguration laden
                     var obsConfigPath = "appsettings.OBS.Configuration.json";
                     var useObsApi = File.Exists(obsConfigPath);
                     if (useObsApi)
@@ -51,48 +55,67 @@ namespace OBS_Booking_App
                         configBuilder.AddJsonFile(obsConfigPath, optional: true, reloadOnChange: true);
                     }
 
+                    // IConfiguration ist das zentrale Interface in .NET, um Konfigurationswerte zur Laufzeit zu lesen
                     var configuration = configBuilder
-                        .AddEnvironmentVariables()
-                        .Build();
+                        .AddEnvironmentVariables()  // alle Umgebungsvariablen überlagern
+                        .Build();                   // zu einer auflösbaren Konfiguration zusammenführen
 
-                    services.AddOptions();
+                    // Konfigurationsobjekte aus den geladenen JSON-Dateien binden
+                    services.Configure<ServicesObsConfiguration>(configuration.GetSection("Services"));
+                    services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
+
+                    // Mehrere Provider implementieren IEmployeesProvider.
+                    // Der Store entscheidet dynamisch, welche Employees geladen werden
                     services.AddSingleton<IEmployeesProvider, EmployeesApiConfiguration>();
                     services.AddSingleton<IEmployeesProvider, EmployeesAppsettingsConfiguration>();
+
+                    // Authentifizierungs- und Geschäftslogik-Services
                     services.AddSingleton<AuthenticationService>();
                     services.AddSingleton<EmployeeStore>();
                     services.AddSingleton<BookingService>();
                     services.AddSingleton<IObsBookingServiceAdapter, ObsBookingServiceAdapter>();
+
+                    // registrierung des Options-Mechanismus im DI-Container.
+                    // Ermöglicht Konfigurationen direkt in stark typisierte Klassen zu binden
+                    // mit Validierung, Default-Werten und Zugriff via IOptions<T>
+                    services.AddOptions();
+
+                    // Hintergrunddienst, der zyklisch Buchungen ausführt
                     services.AddHostedService<Worker>();
 
-                    services.Configure<ServicesObsConfiguration>(configuration.GetSection("Services"));
-                    services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
-
+                    // Dynamische Erstellung und Konfiguration der OBS API Clients
                     services.AddSingleton<IPersonsApi>(provider =>
                     {
                         try
                         {
+                            // Lade URL für Personen-Service
                             var servicesConfig = provider.GetRequiredService<IOptions<ServicesObsConfiguration>>();
                             var obsStammUrl = servicesConfig.Value.StammServiceUrl;
                             var personsApi = new PersonsApi($"{obsStammUrl}");
 
+                            // Hole AccessToken über AuthService
                             var authenticationService = provider.GetRequiredService<AuthenticationService>();
                             var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
+
+                            // Konfiguriere die OBS API mit dem Token
                             personsApi.Configuration = OBS.Stamm.Client.Client.Configuration.MergeConfigurations(
-                            new OBS.Stamm.Client.Client.Configuration()
-                            {
-                                AccessToken = accessToken
-                            },
-                            personsApi.Configuration);
+                                new OBS.Stamm.Client.Client.Configuration()
+                                {
+                                    AccessToken = accessToken
+                                },
+                                personsApi.Configuration);
 
                             return personsApi;
                         }
                         catch
                         {
+                            // Bei Fehler: Rückfall auf Konfiguration über appsettings.json
                             Console.WriteLine("Configuration IPersonsApi is failed!\nFallback: using appsettings.json");
                             return null;
                         }
                     });
 
+                    // Analog für Calendar API
                     services.AddSingleton<IPersonCalendarApi>(provider =>
                     {
                         try
@@ -118,6 +141,7 @@ namespace OBS_Booking_App
                         }
                     });
 
+                    // Analog für Booking API
                     services.AddSingleton<IBookingApi>(provider =>
                     {
                         try
@@ -143,6 +167,7 @@ namespace OBS_Booking_App
                         }
                     });
 
+                    // Hinweis bei fehlender NuGet.Config (z.B. beim Clonen von Repos)
                     if (!File.Exists("NuGet.Config"))
                     {
                         Console.WriteLine("WARNING: NuGet.Config not found. Private feeds may not work for cloned projects.");
