@@ -10,6 +10,10 @@ using System.Collections.Generic;
 
 namespace OBS_Booking_App.Services.Configuration
 {
+    /// <summary>
+    /// Implementiert <see cref="IEmployeesProvider"/>
+    /// und lädt Mitarbeiterdaten aus ObsStamm und ObsCalendar.
+    /// </summary>
     public class EmployeesApiConfiguration : IEmployeesProvider
     {
         List<Employee> employeesCache = new();
@@ -28,25 +32,29 @@ namespace OBS_Booking_App.Services.Configuration
             _logger = logger;
         }
 
+        /// <summary>
+        /// Gibt eine Liste valider Mitarbeiter mit simulierten Buchungszeiten zurück.
+        /// Fehlerhafte Einträge werden geloggt und ignoriert.
+        /// </summary>
         public List<Employee> Employees
         {
             get
             {
-                if (_stammApi == null || _calendarApi == null)
+                if (_stammApi != null || _calendarApi == null)
                     return employeesCache;
 
                 foreach (var emp in _stammApi.All())
                 {
                     try
                     {
-                        ValidateEmployeeData(emp);
+                        ValidateObsStammData(emp);
 
                         var calendarEntries = _calendarApi.GetSimpleFromNumberAndDateAsync(emp.Id, DateTime.Now.Date.ToUniversalTime());
                         DateTime? startTime = null;
                         DateTime? endTime = null;
                         foreach (var entry in calendarEntries)
                         {
-                            ValidateCalendarEntry(entry);
+                            ValidateCalendarData(entry);
                             startTime = entry.StartTime;
                             endTime = entry.EndTime;
                         }
@@ -63,28 +71,29 @@ namespace OBS_Booking_App.Services.Configuration
             }
         }
 
-        private void ValidateEmployeeData(SimplePersonApiModel emp)
+        /// <summary>
+        /// Prüft die Gültigkeit der Stammdaten einer Person.
+        /// </summary>
+        /// <param name="emp">Zu prüfender Personeneintrag</param>
+        /// <exception cref="ArgumentException">Bei ungültiger ID oder Name</exception>
+        private void ValidateObsStammData(SimplePersonApiModel emp)
         {
             if (string.IsNullOrWhiteSpace(emp.Id))
                 throw new ArgumentException("Employee ID is invalid.");
 
             if (string.IsNullOrWhiteSpace(emp.Name))
                 throw new ArgumentException("Employee name is invalid.");
-
-            //if (emp.DateOfEntry == null || emp.DateOfEntry <= DateTime.Now.Date)
-            //    throw new ArgumentException($"Invalid entry date for employee: {emp.Name}");
-
-            //if (emp.DateOfLeaving == null || emp.DateOfLeaving > DateTime.Now.Date)
-            //    throw new ArgumentException($"Invalid leaving date for employee: {emp.Name}");
         }
 
-        private void ValidateCalendarEntry(SimplePersonCalendarApiModel entry)
+        /// <summary>
+        /// Prüft Kalendereintrag auf gültige Arbeits-Beginn-/-End-Zeiten.
+        /// </summary>
+        /// <param name="entry">Kalendereintrag</param>
+        /// <exception cref="ArgumentException">Bei fehlender Start-/Endzeit</exception>
+        private void ValidateCalendarData(SimplePersonCalendarApiModel entry)
         {
             if (entry.StartTime == null || entry.EndTime == null)
                 throw new ArgumentException($"Invalid StartTime or EndTime for employee: {entry.PersonId}");
-
-            //if (entry.Date.Date != DateTime.Now.Date && entry.Date.Date != DateTime.Now.Date.AddDays(-1))
-            //    throw new ArgumentException($"Kalendereintrag ist weder für heute ({today}) noch gestern ({yesterday}).");
         }
 
         private void CreateEmployee(string id, string name, DateTime? startWork, DateTime? endWork)
@@ -103,6 +112,13 @@ namespace OBS_Booking_App.Services.Configuration
             });
         }
 
+        /// <summary>
+        /// Generiert realistische Buchungszeitpunkte basierend auf den Kalenderzeiten.
+        /// Abweichung erfolgt zufällig um einige Minuten.
+        /// </summary>
+        /// <param name="start">Originaler Arbeitsbeginn</param>
+        /// <param name="end">Originales Arbeitsende</param>
+        /// <returns>Tuple mit verschobenem Start- und Endzeitpunkt</returns>
         private (DateTime bookingStart, DateTime bookingEnd) GenerateBookingTimes(DateTime? start, DateTime? end)
         {
             var rnd = new Random();
