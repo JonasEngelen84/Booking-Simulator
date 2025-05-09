@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace OBS_Booking_App.Services
 {
+    /// <summary>
+    /// Der AuthenticationService ist verantwortlich für die Authentifizierung gegen den zentralen STS (Security Token Service) 
+    /// mittels OAuth2 Client Credentials Flow. 
+    /// Er stellt Zugriffstokens für den Zugriff auf geschützte OBS-APIs bereit.
+    /// </summary>
     class AuthenticationService
     {
         private readonly IOptions<AuthenticationConfiguration> _authConfig;
@@ -24,10 +29,19 @@ namespace OBS_Booking_App.Services
             _servicesConfig = servicesConfig;
         }
 
+        /// <summary>
+        /// Fordert ein Access Token beim STS (Security Token Service) an.
+        /// Verwendet OpenID Connect Discovery und den Client-Credentials-Flow.
+        /// </summary>
+        /// <param name="token">CancellationToken zur Abbruchkontrolle.</param>
+        /// <returns> Ein gültiges Access Token als string.</returns>
+        /// <exception cref="AuthenticationException"> Wird geworfen, wenn das Discovery-Dokument nicht abgerufen werden kann.</exception>
+        /// <exception cref="InvalidCredentialException"> Wird geworfen, wenn die Tokenanfrage fehlschlägt.</exception>
         public async Task<string> GetAccessTokenAsync(CancellationToken token)
         {   _logger.LogInformation("Starting request for authentication token from STS.");
-            var obsIdentityUrl = _servicesConfig.Value.STSServiceUrl;
 
+            // Discovery-Dokument vom STS laden (enthält z. B. Token-Endpoint)
+            var obsIdentityUrl = _servicesConfig.Value.STSServiceUrl;
             _logger.LogInformation($"Contacting STS Server at: '{obsIdentityUrl}' for OpenID Configuration.");
             var client = new HttpClient();
             var disco = await client.GetDiscoveryDocumentAsync($"{obsIdentityUrl}", cancellationToken: token);
@@ -40,6 +54,7 @@ namespace OBS_Booking_App.Services
 
             _logger.LogInformation($"Discovery document found. Requesting credentials for Client: '{_authConfig.Value.ClientId}' with scopes: '{_authConfig.Value.Scopes.Aggregate((l, r) => $"{l}, {r}")}'");
 
+            // Zugriffstoken über Client-Credentials anfordern
             var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
             {
                 Address = disco.TokenEndpoint,
