@@ -6,7 +6,7 @@ namespace OBS_Booking_App.Services.Configuration
     /// Konfigurationsdaten für die Authentifizierung mittels Client-Credentials über den STS-Server.
     /// Diese Einstellungen werden im AuthenticationService verwendet, um Zugriffstokens für API-Aufrufe zu erhalten.
     /// </summary>
-    class AuthenticationConfiguration
+    class ObsAuthenticationConfiguration
     {
         public string ClientId { get; set; }        // Die Client-ID zur Authentifizierung bei der OBS-Plattform
         public string ClientSecret { get; set; }    // Das zugehörige Client-Secret zur Authentifizierung

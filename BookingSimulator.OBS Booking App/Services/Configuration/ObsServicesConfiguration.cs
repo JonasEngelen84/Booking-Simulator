@@ -6,7 +6,7 @@
     /// Diese Konfiguration wird in AuthenticationService sowie in der Initialisierung
     /// von IPersonsApi, IPersonCalendarApi und IBookingApi verwendet.
     /// </summary>
-    class ServicesObsConfiguration
+    class ObsServicesConfiguration
     {
         // URL des STS (Security Token Service) zur Authentifizierung und Token-Generierung.
         public string STSServiceUrl { get; set; }

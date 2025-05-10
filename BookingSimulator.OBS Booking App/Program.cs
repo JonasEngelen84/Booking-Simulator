@@ -61,8 +61,8 @@ namespace OBS_Booking_App
                         .Build();                   // zu einer auflösbaren Konfiguration zusammenführen
 
                     // Konfigurationsobjekte aus den geladenen JSON-Dateien binden
-                    services.Configure<ServicesObsConfiguration>(configuration.GetSection("Services"));
-                    services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
+                    services.Configure<ObsServicesConfiguration>(configuration.GetSection("Services"));
+                    services.Configure<ObsAuthenticationConfiguration>(configuration.GetSection("Authentication"));
 
                     // Mehrere Provider implementieren IEmployeesProvider.
                     // Der EmployeeStore entscheidet dynamisch, welche employees geladen werden
@@ -89,7 +89,7 @@ namespace OBS_Booking_App
                         try
                         {
                             // Lade URL für Personen-Service
-                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesObsConfiguration>>();
+                            var servicesConfig = provider.GetRequiredService<IOptions<ObsServicesConfiguration>>();
                             var obsStammUrl = servicesConfig.Value.StammServiceUrl;
                             var personsApi = new PersonsApi($"{obsStammUrl}");
 
@@ -120,7 +120,7 @@ namespace OBS_Booking_App
                     {
                         try
                         {
-                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesObsConfiguration>>();
+                            var servicesConfig = provider.GetRequiredService<IOptions<ObsServicesConfiguration>>();
                             var obsCalendarUrl = servicesConfig.Value.CalendarServiceUrl;
                             var calendarApi = new PersonCalendarApi($"{obsCalendarUrl}");
                             var authenticationService = provider.GetRequiredService<AuthenticationService>();
@@ -146,7 +146,7 @@ namespace OBS_Booking_App
                     {
                         try
                         {
-                            var servicesConfig = provider.GetRequiredService<IOptions<ServicesObsConfiguration>>();
+                            var servicesConfig = provider.GetRequiredService<IOptions<ObsServicesConfiguration>>();
                             var obsBookingUrl = servicesConfig.Value.BookingServiceUrl;
                             var bookingApi = new BookingApi($"{obsBookingUrl}");
                             var authenticationService = provider.GetRequiredService<AuthenticationService>();

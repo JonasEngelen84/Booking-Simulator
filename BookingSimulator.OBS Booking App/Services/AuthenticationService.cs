@@ -17,11 +17,11 @@ namespace OBS_Booking_App.Services
     /// </summary>
     class AuthenticationService
     {
-        private readonly IOptions<AuthenticationConfiguration> _authConfig;
-        private readonly IOptions<ServicesObsConfiguration> _servicesConfig;
+        private readonly IOptions<ObsAuthenticationConfiguration> _authConfig;
+        private readonly IOptions<ObsServicesConfiguration> _servicesConfig;
         private readonly ILogger<AuthenticationService> _logger;
 
-        public AuthenticationService(IOptions<AuthenticationConfiguration> authConfig, ILogger<AuthenticationService> logger, IOptions<ServicesObsConfiguration> servicesConfig)
+        public AuthenticationService(IOptions<ObsAuthenticationConfiguration> authConfig, ILogger<AuthenticationService> logger, IOptions<ObsServicesConfiguration> servicesConfig)
         {
             _authConfig = authConfig;
             _logger = logger;
