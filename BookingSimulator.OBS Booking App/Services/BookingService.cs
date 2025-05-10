@@ -38,33 +38,22 @@ namespace OBS_Booking_App.Services.Configuration
 
             foreach (Employee employee in employees)
             {
-                DateTime timeNow = DateTime.Now;
-
-                if (employee.BookingStartWork >= timeNow && employee.BookingStartWork <= timeNow.AddMinutes(1))
+                if (employee.BookingStartWork >= DateTime.Now && employee.BookingStartWork <= DateTime.Now.AddMinutes(1))
                 {
                     await LoggingProcessAsync(employee, true, "logged IN");
                 }
 
-                if (employee.BookingEndWork >= timeNow && employee.BookingEndWork <= timeNow.AddMinutes(1))
+                if (employee.BookingEndWork >= DateTime.Now && employee.BookingEndWork <= DateTime.Now.AddMinutes(1))
                 {
                     await LoggingProcessAsync(employee, false, "logged OUT");
                     _employeeStore.Employees.Remove(employee);
                 }
             }
 
-            if (booking == true)
+            if (booking)
             {
-                _logger.LogInformation($"\n{DateTime.Now} logged in: {employees.Count(e => e.LoggedIn)}");
                 Console.WriteLine($"\n{DateTime.Now}   logged in: {employees.Count(e => e.LoggedIn)}");
-
-                foreach (Employee employee in _employeeStore.Employees)
-                {
-                    if (employee.LoggedIn)
-                    {
-                        Console.WriteLine($"Id: {employee.Id}   Name: {employee.Name}");
-                    }
-                }
-
+                DisplayActuallyLoggedInEmployees();
                 booking = false;
             }
         }
@@ -84,6 +73,7 @@ namespace OBS_Booking_App.Services.Configuration
             catch (Exception ex)
             {
                 _logger.LogInformation("Connection to IBookingApi failed."+ ex.ToString());
+                Console.WriteLine("Connection to IBookingApi failed.");
             }
 
             employee.LoggedIn = logged;
@@ -91,6 +81,19 @@ namespace OBS_Booking_App.Services.Configuration
             Console.WriteLine($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");
             booking = true;
             await Task.Delay(3000);
+        }
+
+        private void DisplayActuallyLoggedInEmployees()
+        {
+            Console.WriteLine($"\n{DateTime.Now}    Logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
+
+            foreach (Employee employee in _employeeStore.Employees)
+            {
+                if (employee.LoggedIn)
+                {
+                    Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name}");
+                }
+            }
         }
     }
 }
