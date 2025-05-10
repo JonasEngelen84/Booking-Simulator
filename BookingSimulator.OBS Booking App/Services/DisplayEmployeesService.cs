@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OBS_Booking_App.Services
 {
@@ -22,7 +20,7 @@ namespace OBS_Booking_App.Services
             }
         }
 
-        public static void DisplayActuallyLoggedInEmployees(IEnumerable<Employee> employees)
+        public static void DisplayLoggedInEmployees(IEnumerable<Employee> employees)
         {
             var loggedInEmployees = employees.Where(e => e.LoggedIn).ToList();
 

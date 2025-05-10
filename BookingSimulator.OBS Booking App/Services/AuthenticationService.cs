@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OBS_Booking_App.Services.Configuration;
-using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Authentication;

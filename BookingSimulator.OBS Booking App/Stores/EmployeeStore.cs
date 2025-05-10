@@ -1,6 +1,4 @@
-﻿using OBS.Calendar.Client.Api;
-using OBS.Stamm.Client.Api;
-using OBS_Booking_App.Models;
+﻿using OBS_Booking_App.Models;
 using OBS_Booking_App.Services.API;
 using OBS_Booking_App.Services.Configuration;
 using System;
@@ -9,6 +7,12 @@ using System.Linq;
 
 namespace OBS_Booking_App.Stores
 {
+    /// <summary>
+    /// Verwaltet den zentralen employee-Zwischenspeicher für die Anwendung.
+    /// Die employees werden zur Laufzeit von verschiedenen Datenquellen geladen.
+    /// Bevorzugt wird der API-Provider (EmployeesApiConfiguration), sofern mindestens 25 gültige Datensätze vorhanden sind.
+    /// Fallback ist der Appsettings-Provider (EmployeesAppsettingsConfiguration).
+    /// </summary>
     public class EmployeeStore
     {
         private List<Employee> _employees = new();
@@ -23,17 +27,25 @@ namespace OBS_Booking_App.Stores
 
         public void UpdateEmployees()
         {
-            var ObsApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
+            // Implementierende Klassen der IEmployeesProvider bereitstellen
+            var obsApiProvider = _providers.OfType<EmployeesApiConfiguration>().FirstOrDefault();
             var appsettingsProvider = _providers.OfType<EmployeesAppsettingsConfiguration>().FirstOrDefault();
 
-            var apiEmployees = ObsApiProvider.Employees;
-            if (apiEmployees != null && apiEmployees.Count >= 25)
+            if (obsApiProvider == null || appsettingsProvider == null)
+            {
+                Console.WriteLine("EmployeeStore: Configuration failed – all provider has been registered.");
+                throw new InvalidOperationException("EmployeeStore: Employee-provider is missing.");
+            }
+
+            // Employees aus EmployeesApiConfiguration laden
+            var apiEmployees = obsApiProvider.Employees;
+            if (apiEmployees.Count >= 25)
             {
                 _employees = new List<Employee>(apiEmployees);
             }
             else
             {
-                Console.WriteLine("OBS.API.Configuration failed!\nUsing appsettings.Configuration");
+                Console.WriteLine("EmployeeStore: OBS.API.Configuration failed!\nUsing appsettings.Configuration");
                 _employees = new List<Employee>(appsettingsProvider.Employees);
             }
         }

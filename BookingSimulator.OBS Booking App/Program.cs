@@ -47,7 +47,7 @@ namespace OBS_Booking_App
                     var configBuilder = new ConfigurationBuilder()
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-                    // Wenn appsettings.OBS.Configuration.json vorhanden => OBS-spezifische Konfiguration laden
+                    // Wenn appsettings.OBS.Configuration.json vorhanden => OBS-speziefische Konfiguration laden
                     var obsConfigPath = "appsettings.OBS.Configuration.json";
                     var useObsApi = File.Exists(obsConfigPath);
                     if (useObsApi)
@@ -65,7 +65,7 @@ namespace OBS_Booking_App
                     services.Configure<AuthenticationConfiguration>(configuration.GetSection("Authentication"));
 
                     // Mehrere Provider implementieren IEmployeesProvider.
-                    // Der Store entscheidet dynamisch, welche Employees geladen werden
+                    // Der EmployeeStore entscheidet dynamisch, welche employees geladen werden
                     services.AddSingleton<IEmployeesProvider, EmployeesApiConfiguration>();
                     services.AddSingleton<IEmployeesProvider, EmployeesAppsettingsConfiguration>();
 
@@ -73,7 +73,7 @@ namespace OBS_Booking_App
                     services.AddSingleton<AuthenticationService>();
                     services.AddSingleton<EmployeeStore>();
                     services.AddSingleton<BookingService>();
-                    services.AddSingleton<IObsBookingServiceAdapter, ObsBookingServiceAdapter>();
+                    services.AddSingleton<IObsBookingAdapter, ObsBookingAdapterService>();
 
                     // registrierung des Options-Mechanismus im DI-Container.
                     // Ermöglicht Konfigurationen direkt in stark typisierte Klassen zu binden
@@ -93,7 +93,7 @@ namespace OBS_Booking_App
                             var obsStammUrl = servicesConfig.Value.StammServiceUrl;
                             var personsApi = new PersonsApi($"{obsStammUrl}");
 
-                            // Hole AccessToken über AuthService
+                            // Hole AccessToken über AuthenticationService
                             var authenticationService = provider.GetRequiredService<AuthenticationService>();
                             var accessToken = authenticationService.GetAccessTokenAsync(default).Result;
 

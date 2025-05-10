@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using OBS.Calendar.Client.Api;
-using OBS.Calendar.Client.Model;
 using OBS.Stamm.Client.Api;
 using OBS.Stamm.Client.Model;
 using OBS_Booking_App.Models;
@@ -11,13 +10,10 @@ using System.Collections.Generic;
 namespace OBS_Booking_App.Services.Configuration
 {
     /// <summary>
-    /// Implementiert <see cref="IEmployeesProvider"/>
-    /// und lädt Mitarbeiterdaten aus ObsStamm und ObsCalendar.
+    /// Lädt Mitarbeiterdaten aus ObsStamm und ObsCalendar.
     /// </summary>
     public class EmployeesApiConfiguration : IEmployeesProvider
     {
-        List<Employee> employeesCache = new();
-
         private readonly IPersonsApi _stammApi;
         private readonly IPersonCalendarApi _calendarApi;
         private readonly ILogger<EmployeesApiConfiguration> _logger;
@@ -32,39 +28,36 @@ namespace OBS_Booking_App.Services.Configuration
             _logger = logger;
         }
 
-        /// <summary>
-        /// Gibt eine Liste valider Mitarbeiter mit simulierten Buchungszeiten zurück.
-        /// Fehlerhafte Einträge werden geloggt und ignoriert.
-        /// </summary>
         public List<Employee> Employees
         {
             get
             {
+                List<Employee> employeesCache = [];
+
                 if (_stammApi != null || _calendarApi == null)
                     return employeesCache;
 
-                foreach (var emp in _stammApi.All())
+                try
                 {
-                    try
+                    // Employee-Daten aus OBS_Stamm laden
+                    foreach (var spam in _stammApi.All())
                     {
-                        ValidateObsStammData(emp);
+                        ValidateObsStammData(spam);
 
-                        var calendarEntries = _calendarApi.GetSimpleFromNumberAndDateAsync(emp.Id, DateTime.Now.Date.ToUniversalTime());
-                        DateTime? startTime = null;
-                        DateTime? endTime = null;
-                        foreach (var entry in calendarEntries)
+                        // Employee-Daten aus OBS_Calendar laden
+                        foreach (var dpcam in _calendarApi.GetDetailedFromNumberAndDateAsync(spam.Id, DateTime.Now.Date.ToUniversalTime()))
                         {
-                            ValidateCalendarData(entry);
-                            startTime = entry.StartTime;
-                            endTime = entry.EndTime;
-                        }
+                            if (dpcam.StartTime == null || dpcam.EndTime == null)
+                                throw new ArgumentException($"Invalid StartTime or EndTime for employee: {dpcam.PersonId}");
 
-                        CreateEmployee(emp.Id, emp.Name, startTime, endTime);
+                            var employee = CreateEmployee(spam.Id, spam.Name, dpcam.StartTime, dpcam.EndTime);
+                            employeesCache.Add(employee);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning($"Employee data failure: {ex.Message}");
-                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Employee data failure: {ex.Message}");
                 }
 
                 return employeesCache;
@@ -72,44 +65,39 @@ namespace OBS_Booking_App.Services.Configuration
         }
 
         /// <summary>
-        /// Prüft die Gültigkeit der Stammdaten einer Person.
+        /// Prüft die Gültigkeit der Stammdaten eines employee.
         /// </summary>
-        /// <param name="emp">Zu prüfender Personeneintrag</param>
+        /// <param name="spam">Zu prüfender Personeneintrag</param>
         /// <exception cref="ArgumentException">Bei ungültiger ID oder Name</exception>
-        private void ValidateObsStammData(SimplePersonApiModel emp)
+        private void ValidateObsStammData(SimplePersonApiModel spam)
         {
-            if (string.IsNullOrWhiteSpace(emp.Id))
+            if (string.IsNullOrWhiteSpace(spam.Id))
                 throw new ArgumentException("Employee ID is invalid.");
 
-            if (string.IsNullOrWhiteSpace(emp.Name))
+            if (string.IsNullOrWhiteSpace(spam.Name))
                 throw new ArgumentException("Employee name is invalid.");
+
+            //if (emp.DateOfEntry == null || emp.DateOfEntry <= DateTime.Now.Date)
+            //    throw new ArgumentException($"Invalid entry date for employee: {emp.Name}");
+
+            //if (emp.DateOfLeaving == null || emp.DateOfLeaving > DateTime.Now.Date)
+            //    throw new ArgumentException($"Invalid leaving date for employee: {emp.Name}");
         }
 
-        /// <summary>
-        /// Prüft Kalendereintrag auf gültige Arbeits-Beginn-/-End-Zeiten.
-        /// </summary>
-        /// <param name="entry">Kalendereintrag</param>
-        /// <exception cref="ArgumentException">Bei fehlender Start-/Endzeit</exception>
-        private void ValidateCalendarData(SimplePersonCalendarApiModel entry)
+        private Employee CreateEmployee(string id, string name, DateTime? startWork, DateTime? endWork)
         {
-            if (entry.StartTime == null || entry.EndTime == null)
-                throw new ArgumentException($"Invalid StartTime or EndTime for employee: {entry.PersonId}");
-        }
+            var (bookingStartWork, bookingEndWork) = GenerateBookingTimes(startWork, endWork);
 
-        private void CreateEmployee(string id, string name, DateTime? startWork, DateTime? endWork)
-        {
-            var (bookingStart, bookingEnd) = GenerateBookingTimes(startWork, endWork);
-
-            employeesCache.Add(new Employee(
+            return new Employee(
                     id,
                     name,
                     startWork,
                     endWork,
-                    bookingStart,
-                    bookingEnd)
+                    bookingStartWork,
+                    bookingEndWork)
             {
-                LoggedIn = bookingStart <= DateTime.Now && bookingEnd >= DateTime.Now
-            });
+                LoggedIn = bookingStartWork <= DateTime.Now && bookingEndWork >= DateTime.Now
+            };
         }
 
         /// <summary>
@@ -124,7 +112,8 @@ namespace OBS_Booking_App.Services.Configuration
             var rnd = new Random();
 
             int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
-            int endOffset = rnd.Next(1, 10) <= 3 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
+            int endOffset = rnd.Next(0, 10);
+            //return (DateTime.Now.AddMinutes(startOffset), DateTime.Now.AddMinutes(endOffset));
 
             return (start.Value.AddMinutes(startOffset), end.Value.AddMinutes(endOffset));
         }

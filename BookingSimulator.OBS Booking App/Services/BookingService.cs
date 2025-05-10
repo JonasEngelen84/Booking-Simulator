@@ -1,29 +1,30 @@
 ﻿using Microsoft.Extensions.Logging;
-using OBS.Booking.Client.Api;
-using OBS.Booking.Client.Model;
 using OBS_Booking_App.Models;
 using OBS_Booking_App.Services.API;
 using OBS_Booking_App.Stores;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace OBS_Booking_App.Services.Configuration
 {
+    /// <summary>
+    /// Zentraler Service zur automatisierten Buchung von Mitarbeiteranwesenheiten über externe OBS-Services.
+    /// Das Interface <see cref="IObsBookingAdapter"/> abstrahiert die externe OBS-Buchungslogik, 
+    /// um die Testbarkeit zu erhöhen, konkrete Abhängigkeiten zu entkoppeln und alternative Implementierungen zu ermöglichen.
+    /// </summary>
     public class BookingService
     {
         private readonly EmployeeStore _employeeStore;
-        private readonly IObsBookingServiceAdapter _obsBookingAdapter;
+        private readonly IObsBookingAdapter _obsBookingAdapter;
         private readonly ILogger<BookingService> _logger;
 
-        private bool bookingServiceStarted = true;
-        private bool booking = false;
+        private bool _bookingServiceStarted = true;
+        private bool _bookingOccurred = false;
 
         public BookingService(
             EmployeeStore employeesStore,
-            IObsBookingServiceAdapter obsBookingAdapter,
+            IObsBookingAdapter obsBookingAdapter,
             ILogger<BookingService> logger)
         {
             _employeeStore = employeesStore;
@@ -33,16 +34,18 @@ namespace OBS_Booking_App.Services.Configuration
 
         public async Task ExecuteAsync()
         {
-            bookingServiceStarted = true;
-            List<Employee> employees = new(_employeeStore.Employees);
+            _bookingServiceStarted = true;
+            List<Employee> employeesSnapshot = new(_employeeStore.Employees);
 
-            foreach (Employee employee in employees)
+            foreach (Employee employee in employeesSnapshot)
             {
+                // Prüft ob eine Ankunftsbuchung in der nächsten Minute erfolgen soll
                 if (employee.BookingStartWork >= DateTime.Now && employee.BookingStartWork <= DateTime.Now.AddMinutes(1))
                 {
                     await LoggingProcessAsync(employee, true, "logged IN");
                 }
 
+                // Prüft ob eine Abgangsbuchung in der nächsten Minute erfolgen soll
                 if (employee.BookingEndWork >= DateTime.Now && employee.BookingEndWork <= DateTime.Now.AddMinutes(1))
                 {
                     await LoggingProcessAsync(employee, false, "logged OUT");
@@ -50,25 +53,38 @@ namespace OBS_Booking_App.Services.Configuration
                 }
             }
 
-            if (booking)
+            // Wenn gebucht wurde => eingeloggte Mitarbeiter ausgeben
+            if (_bookingOccurred)
             {
-                Console.WriteLine($"\n{DateTime.Now}   logged in: {employees.Count(e => e.LoggedIn)}");
-                DisplayActuallyLoggedInEmployees();
-                booking = false;
+                EmployeeDisplayService.DisplayLoggedInEmployees(_employeeStore.Employees);
+                _bookingOccurred = false;
             }
         }
 
-        private async Task LoggingProcessAsync(Employee employee, bool logged, string log)
+        /// <summary>
+        /// Führt eine Buchung (Ankunft oder Abgang) durch und protokolliert sie.
+        /// </summary>
+        /// <param name="isLogin">true für Ankunft, false für Abgang</param>
+        /// <param name="logText">Beschreibung für die Konsole</param>
+        private async Task LoggingProcessAsync(Employee employee, bool isLogin, string logText)
         {
-            if (bookingServiceStarted)
+            if (_bookingServiceStarted)
             {
                 Console.WriteLine("\nBooking Service started:");
-                bookingServiceStarted = false;
+                _bookingServiceStarted = false;
             }
+
+            Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name,-20}{logText}: {DateTime.Now}");
+            employee.LoggedIn = isLogin;
+            _bookingOccurred = true;
 
             try
             {
-                await _obsBookingAdapter.CreateBookingAsync(employee, logged ? BookingAction.Arrive : BookingAction.Leave);
+                // Durch Dependency Injection wird beim Hosting die konkrete Implementierung ObsBookingAdapterService injiziert.
+                // Die Methode CreateBookingAsync wird darüber aufgerufen.
+                // Das Enum BookingAction ist in derselben Namespace-Hierarchie wie das Interface IObsBookingAdapter
+                // deklariert und wird dort als Parameter verwendet. Deshalb kann es direkt mit dem Interface genutzt werden.
+                await _obsBookingAdapter.CreateBookingAsync(employee.Id, isLogin ? BookingAction.Arrive : BookingAction.Leave);
             }
             catch (Exception ex)
             {
@@ -76,24 +92,7 @@ namespace OBS_Booking_App.Services.Configuration
                 Console.WriteLine("Connection to IBookingApi failed.");
             }
 
-            employee.LoggedIn = logged;
-            _logger.LogInformation($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");
-            Console.WriteLine($"Id: {employee.Id,-8}Name: {employee.Name,-20}{log}: {DateTime.Now}");
-            booking = true;
-            await Task.Delay(3000);
-        }
-
-        private void DisplayActuallyLoggedInEmployees()
-        {
-            Console.WriteLine($"\n{DateTime.Now}    Logged in: {_employeeStore.Employees.Count(e => e.LoggedIn)}");
-
-            foreach (Employee employee in _employeeStore.Employees)
-            {
-                if (employee.LoggedIn)
-                {
-                    Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name}");
-                }
-            }
+            await Task.Delay(3000); // Wartet 3 Sekunden um API-Überlastung zu vermeiden + Realitätsnähe
         }
     }
 }

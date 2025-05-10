@@ -1,12 +1,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OBS_Booking_App.Models;
 using OBS_Booking_App.Services;
 using OBS_Booking_App.Services.Configuration;
 using OBS_Booking_App.Stores;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +37,7 @@ namespace OBS_Booking_App
                     Console.WriteLine($"\n{DateTime.Now} Update employees\nTry using OBS.API.Configuration");
                     _employeeStore.UpdateEmployees();
                     EmployeeDisplayService.DisplayRegisteredEmployees(_employeeStore.Employees);
-                    EmployeeDisplayService.DisplayActuallyLoggedInEmployees(_employeeStore.Employees);
+                    EmployeeDisplayService.DisplayLoggedInEmployees(_employeeStore.Employees);
                 }
 
                 long elapsedMilliseconds = 0;
