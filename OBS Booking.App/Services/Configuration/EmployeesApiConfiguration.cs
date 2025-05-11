@@ -2,12 +2,12 @@
 using OBS.Calendar.Client.Api;
 using OBS.Stamm.Client.Api;
 using OBS.Stamm.Client.Model;
-using OBS_Booking_App.Models;
-using OBS_Booking_App.Services.API;
+using OBS_Booking.App.Models;
+using OBS_Booking.App.Services.API;
 using System;
 using System.Collections.Generic;
 
-namespace OBS_Booking_App.Services.Configuration
+namespace OBS_Booking.App.Services.Configuration
 {
     /// <summary>
     /// Lädt Mitarbeiterdaten aus ObsStamm und ObsCalendar.

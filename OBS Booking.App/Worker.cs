@@ -1,14 +1,14 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OBS_Booking_App.Services;
-using OBS_Booking_App.Services.Configuration;
-using OBS_Booking_App.Stores;
+using OBS_Booking.App.Services;
+using OBS_Booking.App.Services.Configuration;
+using OBS_Booking.App.Stores;
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OBS_Booking_App
+namespace OBS_Booking.App
 {
     /// <summary>
     /// Hintergrunddienst, der in regelm‰ﬂigen Abst‰nden Buchungen verarbeitet und Mitarbeiterdaten aktualisiert.

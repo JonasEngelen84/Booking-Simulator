@@ -1,14 +1,14 @@
 ﻿using IdentityModel.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OBS_Booking_App.Services.Configuration;
+using OBS_Booking.App.Services.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace OBS_Booking_App.Services
+namespace OBS_Booking.App.Services
 {
     /// <summary>
     /// Der AuthenticationService ist verantwortlich für die Authentifizierung gegen den zentralen STS (Security Token Service) 

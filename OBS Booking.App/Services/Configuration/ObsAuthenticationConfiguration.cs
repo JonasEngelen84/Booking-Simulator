@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace OBS_Booking_App.Services.Configuration
+namespace OBS_Booking.App.Services.Configuration
 {
     /// <summary>
     /// Konfigurationsdaten für die Authentifizierung mittels Client-Credentials über den STS-Server.

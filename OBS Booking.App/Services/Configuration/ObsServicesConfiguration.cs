@@ -1,4 +1,4 @@
-﻿namespace OBS_Booking_App.Services.Configuration
+﻿namespace OBS_Booking.App.Services.Configuration
 {
     /// <summary>
     /// Repräsentiert die Service-Endpunkte der OBS-Plattform,

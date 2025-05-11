@@ -1,7 +1,7 @@
-﻿using OBS_Booking_App.Models;
+﻿using OBS_Booking.App.Models;
 using System.Collections.Generic;
 
-namespace OBS_Booking_App.Services.API
+namespace OBS_Booking.App.Services.API
 {
     /// <summary>
     /// Definiert einen generischen Vertrag für Datenquellen, die Mitarbeiterinformationen (Employee) bereitstellen.

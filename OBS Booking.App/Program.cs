@@ -6,15 +6,15 @@ using OBS.Booking.Client.Api;
 using OBS.Calendar.Client.Api;
 using OBS.LIB.Logging.Extensions;
 using OBS.Stamm.Client.Api;
-using OBS_Booking_App.Services;
-using OBS_Booking_App.Services.API;
-using OBS_Booking_App.Services.Configuration;
-using OBS_Booking_App.Stores;
+using OBS_Booking.App.Services;
+using OBS_Booking.App.Services.API;
+using OBS_Booking.App.Services.Configuration;
+using OBS_Booking.App.Stores;
 using Serilog;
 using System;
 using System.IO;
 
-namespace OBS_Booking_App
+namespace OBS_Booking.App
 {
     public class Program
     {
@@ -22,7 +22,7 @@ namespace OBS_Booking_App
         {
             try
             {
-                Console.WriteLine("Booking Simulator started\n");
+                Console.WriteLine("OBS Booking Simulator started\n");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

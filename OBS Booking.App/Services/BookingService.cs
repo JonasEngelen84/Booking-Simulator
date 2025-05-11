@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using OBS_Booking_App.Models;
-using OBS_Booking_App.Services.API;
-using OBS_Booking_App.Stores;
+using OBS_Booking.App.Models;
+using OBS_Booking.App.Services.API;
+using OBS_Booking.App.Stores;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace OBS_Booking_App.Services.Configuration
+namespace OBS_Booking.App.Services.Configuration
 {
     /// <summary>
     /// Zentraler Service zur automatisierten Buchung von Mitarbeiteranwesenheiten über externe OBS-Services.

@@ -1,12 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Moq;
-using OBS.Booking.Client.Api;
-using OBS_Booking_App.Models;
-using OBS_Booking_App.Services.API;
-using OBS_Booking_App.Services.Configuration;
-using OBS_Booking_App.Stores;
+﻿using Moq;
 
-namespace OBS_Booking_App.Tests
+namespace OBS_Booking.Tests
 {
     public class BookingServiceTests
     {

@@ -1,10 +1,10 @@
 ﻿using OBS.Booking.Client.Api;
 using OBS.Booking.Client.Model;
-using OBS_Booking_App.Services.API;
+using OBS_Booking.App.Services.API;
 using System;
 using System.Threading.Tasks;
 
-namespace OBS_Booking_App.Services
+namespace OBS_Booking.App.Services
 {
     /// <summary>
     /// Adapterklasse zur Integration des OBS-Buchungsdienstes.

@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using OBS_Booking.Services.Configuration;
-using OBS_Booking_App.Models;
-using OBS_Booking_App.Services.API;
+using OBS_Booking.App.Services.Configuration;
+using OBS_Booking.App.Models;
+using OBS_Booking.App.Services.API;
 using System;
 using System.Collections.Generic;
 
-namespace OBS_Booking_App.Services.Configuration
+namespace OBS_Booking.App.Services.Configuration
 {
     /// <summary>
     /// Liest und verarbeitet employee-Daten aus appsettings.json.

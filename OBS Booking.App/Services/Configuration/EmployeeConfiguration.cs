@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OBS_Booking.Services.Configuration
+namespace OBS_Booking.App.Services.Configuration
 {
     public class EmployeeConfiguration
     {

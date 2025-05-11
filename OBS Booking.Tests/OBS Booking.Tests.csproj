@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BookingSimulator.OBS Booking App\OBS Booking App.csproj" />
+    <ProjectReference Include="..\OBS Booking App\OBS Booking App.csproj" />
   </ItemGroup>
 
   <ItemGroup>

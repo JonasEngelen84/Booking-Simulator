@@ -1,9 +1,9 @@
-﻿using OBS_Booking_App.Models;
+﻿using OBS_Booking.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OBS_Booking_App.Services
+namespace OBS_Booking.App.Services
 {
     /// <summary>
     /// Service zur Ausgabe der Mitarbeiter

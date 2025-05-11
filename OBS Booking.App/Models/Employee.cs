@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OBS_Booking_App.Models
+namespace OBS_Booking.App.Models
 {
     public class Employee
     {
