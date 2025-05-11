@@ -74,7 +74,7 @@ namespace OBS_Booking_App.Services.Configuration
                 _bookingServiceStarted = false;
             }
 
-            Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name,-20}{logText}: {DateTime.Now}");
+            Console.WriteLine($"Id: {employee.Id,-10}Name: {employee.Name,-25}{logText}: {DateTime.Now}");
             employee.LoggedIn = isLogin;
             _bookingOccurred = true;
 
@@ -83,13 +83,13 @@ namespace OBS_Booking_App.Services.Configuration
                 // Durch Dependency Injection wird beim Hosting die konkrete Implementierung ObsBookingAdapterService injiziert.
                 // Die Methode CreateBookingAsync wird darüber aufgerufen.
                 // Das Enum BookingAction ist in derselben Namespace-Hierarchie wie das Interface IObsBookingAdapter
-                // deklariert und wird dort als Parameter verwendet. Deshalb kann es direkt mit dem Interface genutzt werden.
+                // deklariert und wird dort als Parameter verwendet. So kann es direkt mit dem Interface genutzt werden.
                 await _obsBookingAdapter.CreateBookingAsync(employee.Id, isLogin ? BookingAction.Arrive : BookingAction.Leave);
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("Connection to IBookingApi failed."+ ex.ToString());
-                Console.WriteLine("Connection to IBookingApi failed.");
+                _logger.LogInformation("Connection to BookingApi failed."+ ex.ToString());
+                Console.WriteLine("Connection to BookingApi failed.");
             }
 
             await Task.Delay(3000); // Wartet 3 Sekunden um API-Überlastung zu vermeiden + Realitätsnähe

@@ -34,7 +34,7 @@ namespace OBS_Booking_App.Services.Configuration
             {
                 List<Employee> employeesCache = [];
 
-                if (_stammApi != null || _calendarApi == null)
+                if (_stammApi == null || _calendarApi == null)
                     return employeesCache;
 
                 try
@@ -113,9 +113,9 @@ namespace OBS_Booking_App.Services.Configuration
 
             int startOffset = rnd.Next(1, 10) == 1 ? rnd.Next(0, 10) : rnd.Next(-10, 0);
             int endOffset = rnd.Next(0, 10);
-            //return (DateTime.Now.AddMinutes(startOffset), DateTime.Now.AddMinutes(endOffset));
 
-            return (start.Value.AddMinutes(startOffset), end.Value.AddMinutes(endOffset));
+            return (DateTime.Now.AddMinutes(startOffset+10), DateTime.Now.AddMinutes(endOffset+15));
+            //return (start.Value.AddMinutes(startOffset), end.Value.AddMinutes(endOffset));
         }
     }
 }
